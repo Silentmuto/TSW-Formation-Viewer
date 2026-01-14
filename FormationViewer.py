@@ -11,8 +11,8 @@ now = datetime.now()
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-#sys.stderr = open('errorlog.txt', 'w')
-#sys.stdout = open('outputlog.txt', "w")
+sys.stderr = open('errorlog.txt', 'w')
+sys.stdout = open('outputlog.txt', "w")
 #subscription id = 42
 #add reverse display
 #pressure options
@@ -1152,30 +1152,9 @@ class MainWindow(wx.Frame):
                             self.SkipCurrent = 1
                     if not self.SkipCurrent:
                         CurrentVehicle = Vehicle(VehName,i)
-                        LogFile.write("\n Post Constructor PrintData \n")
                         LogFile.write(str(CurrentVehicle.PrintData()))
                         res = CurrentVehicle.UpdateData()
-                        LogFile.write("Results after first update data \n")
-                        LogFile.write(f"res =  {res} \n" )
                         if res:
-                            LogFile.write(f"searching data for vehicle with index = {i}")
-                            FoundData = FindData(i)
-                            CurrentVehicle.BTT = FoundData[0]
-                            CurrentVehicle.BPT = FoundData[1]
-                            CurrentVehicle.BCT = FoundData[2]
-                            CurrentVehicle.isWagon = FoundData[3]
-                            CurrentVehicle.CargoWeight = FoundData[4]
-                            res = CurrentVehicle.UpdateData()
-                        if res:
-                            LogFile.write(f"searching data for vehicle with index = {i}")
-                            FoundData = FindData(i)
-                            CurrentVehicle.BTT = FoundData[0]
-                            CurrentVehicle.BPT = FoundData[1]
-                            CurrentVehicle.BCT = FoundData[2]
-                            CurrentVehicle.isWagon = FoundData[3]
-                            CurrentVehicle.CargoWeight = FoundData[4]
-                            res = CurrentVehicle.UpdateData()
-                        if  res:
                             LogFile.write(f"searching data for vehicle with index = {i}")
                             FoundData = FindData(i)
                             CurrentVehicle.BTT = FoundData[0]
@@ -1202,9 +1181,6 @@ class MainWindow(wx.Frame):
                             self.DoubleBrakeSwitchCount += 1
                         if CurrentVehicle.BTT == 420:
                             self.DoubleBrakeSwitchCount += 1
-            cnt = 1
-            
-            
             CC = self.FormationListUI.GetItemCount()
             if self.HasGPRSwitch:
                 self.Toggle5Button.Show()
@@ -1381,37 +1357,71 @@ class MainWindow(wx.Frame):
         self.text = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header)
         self.text = self.text.json()
         self.fl = int(self.text['Values']['FormationLength'])
-        LogFile.write("Detected " + str(self.VehCount) + " vehicles \n")
-        LogFile.flush() # Add this line
+        LogFile.write("Detected " + str(self.fl) + " vehicles \n")
+        LogFile.flush() 
         self.FormationLength = 0.0
         self.FormationList = []
         for i in range(self.fl):
-                if not self.SkipNext:
+                    self.SkipCurrent = 0
                     vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).json()
                     vname = vname['Values']['ObjectName']
+                    fname = vname.split("_")
                     VehName = GetVehicleName(vname)
                     LogFile.write("Detected " + vname + " at position " + str(i) + "with reference name " + VehName + "\n")
                     if VehName == "Laaers":
                         self.SkipNext = 1
-                        self.FArti = 1
-                    else:
-                        self.FArti = 0                 
-                    CurrentVehicle = Vehicle(VehName,i)
-                    CurrentVehicle.UpdateData()
-                    self.FormationList.append(CurrentVehicle)
-                    LogFile.write("Adding Vehicle to UI list \n")
-                    idx = self.FormationListUI.GetItemCount()
-                    itemlist = []
-                    itemlist.append(str(idx))
-                    itemlist += CurrentVehicle.ReturnSequence()
-                    #print(itemlist)
-                    self.FormationListUI.AppendItem(itemlist)
-                else:
-                    self.SkipNext = 0
+                        if fname[3] == "B":
+                            self.SkipCurrent = 1
+                        if fname[2] == "B":
+                            self.SkipCurrent = 1
+                    if not self.SkipCurrent:          
+                        CurrentVehicle = Vehicle(VehName,i)
+                        LogFile.write(str(CurrentVehicle.PrintData()))
+                        res = CurrentVehicle.UpdateData()
+                        if res:
+                            LogFile.write(f"searching data for vehicle with index = {i}")
+                            FoundData = FindData(i)
+                            CurrentVehicle.BTT = FoundData[0]
+                            CurrentVehicle.BPT = FoundData[1]
+                            CurrentVehicle.BCT = FoundData[2]
+                            CurrentVehicle.isWagon = FoundData[3]
+                            CurrentVehicle.CargoWeight = FoundData[4]
+                            res = CurrentVehicle.UpdateData()
+
+                        LogFile.write(str(CurrentVehicle.PrintData()))
+                        if not str(CurrentVehicle.BTT) == str(0):
+                            self.HasGPRSwitch = 1
+
+                        self.FormationList.append(CurrentVehicle)
+                        LogFile.write("Adding Vehicle to UI list \n")
+                        LogFile.flush() # Add this line
+                        idx = self.FormationListUI.GetItemCount()
+                        itemlist = []
+                        itemlist.append(str(idx))
+                        itemlist += CurrentVehicle.ReturnSequence()
+                        self.FormationListUI.AppendItem(itemlist)
+                        CurrentVehicle.SetSubs()
+                        if CurrentVehicle.BTT == 7:
+                            self.DoubleBrakeSwitchCount += 1
+                        if CurrentVehicle.BTT == 420:
+                            self.DoubleBrakeSwitchCount += 1
+                        self.SkipNext = 0
         CC = self.FormationListUI.GetItemCount()
-        for i in range(CC):
-                self.ChoiceControlWindow.CreateBrakeControl(i,self.FormationList[i].GetPBM(),self.FormationList[i].GetBMInt()) 
-        self.ChoiceControlWindow.RebuildLayout()  
+        if self.HasGPRSwitch:
+            self.Toggle5Button.Show()
+            self.ToggleAllButton.Show()
+            self.FormationListUI.GetColumn(2).SetHidden(0)
+            for i in range(CC):
+                PBM = self.FormationList[i].GetPBM()
+                BMI = self.FormationList[i].GetBMInt()
+                
+                #print(f"for i = {i} PBM = {PBM} BMI = {BMI} BTT = {self.FormationList[i].BTT}")
+                self.ChoiceControlWindow.CreateBrakeControl(i,PBM,BMI)
+        else:
+                self.Toggle5Button.Hide()
+                self.ToggleAllButton.Hide()
+                self.FormationListUI.GetColumn(2).SetHidden(1)
+        self.ChoiceControlWindow.RebuildLayout()
         self.WindowSizer.Add(self.ChoiceControlWindow)
         self.WindowSizer.Layout()
         self.ChoiceControlWindow.Show()
@@ -1424,6 +1434,6 @@ class MainWindow(wx.Frame):
 
 
 
-app = wx.App(False)
-MainWindow = MainWindow(None, "Formation Viewer 1.0.1")
+app = wx.App(True,"ProgramOutput.log")
+MainWindow = MainWindow(None, "Formation Viewer 0.2")
 app.MainLoop()
