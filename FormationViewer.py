@@ -188,7 +188,7 @@ class Vehicle:
                 LogFile.flush() 
                 HasError = 1
             
-            
+            LogFile.write(f"\n HasError after BP = {HasError} \n")
             if self.BCT == 1:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[PU]+ "", headers = header).json()    
             if self.BCT == 2:
@@ -210,7 +210,7 @@ class Vehicle:
                 LogFile.write(f"Error finding BC values for  vehicle {self.Name} ")
                 LogFile.flush() 
                 HasError = 1
-
+            LogFile.write(f"\n HasError after BC = {HasError} \n")
 
             if self.BTT == 1:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.Function.GetCurrentNotchIndex", headers = header).json()
@@ -382,8 +382,10 @@ class Vehicle:
                  V2 = ReqData['Values']['ReturnValue']
                  R = max(V1,V2)
                  if R:
+                     BR = 0
                      self.BrakeType = "[G]"
                  else:
+                     BR = 0
                      self.BrakeType = "[P]"
             if BR == -1:
                 HasError = 1
@@ -404,7 +406,8 @@ class Vehicle:
                             self.BrakeType = "[P2]"
                         elif BR == 3:
                             self.BrakeType = "[R]"
-            #print(str(self.BTT) + "for vehicle")
+            LogFile.write(str(self.BTT) + "for vehicle")
+            LogFile.write(f"\n HasError after BT = {HasError} \n")
             return HasError
     def SetSubs(self):
         #Setting subs for BP  pressure
@@ -425,8 +428,8 @@ class Vehicle:
 
         if self.BCT == 0:
                 print("subs for no bct")
-                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/ObjectClass?Subscription=42", headers = header)
-                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/ObjectName?Subscription=42", headers = header)
+                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND1?Subscription=42", headers = header)
+                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND@?Subscription=42", headers = header)
         if self.BCT == 1:
             request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
             request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
@@ -534,6 +537,7 @@ class Vehicle:
                     return "[P]"
         if self.BTT == 2:
             if not BI:
+                #print(f"brakeisp")
                 return "[P]"
             else:
                 return "[G]"
@@ -649,6 +653,14 @@ class Vehicle:
                 return "[P]"
             elif BI == 2:
                 return "[R]"
+        if self.BTT == 420:
+            if BI == 0:
+                if BI2 == 1:
+                    return "[P]"
+                else:
+                    return "[G]"
+            if BI == 1:
+                return "[P]"
         return Bstr
     def GetPBM(self): #GetPossibleBrakeModes
         if self.Name == "Bpmmbdzf":
@@ -695,7 +707,7 @@ class Vehicle:
         if self.BTT == 15:
             return ["G","P","R"]
         if self.BTT == 420:
-            return ["G","P","R"]
+            return ["G","P"]
         return  ["?"]
     def GetBMInt(self):
         if self.Name == "Bpmmbdzf":
@@ -760,6 +772,16 @@ class Vehicle:
                 return 1
             if self.BrakeType == "[P]":
                 return 0
+        if self.BTT == 420:
+            if self.BrakeType == "[G]":
+                return 0
+            else:
+                return 1
+        if self.BTT == 2:
+            if self.BrakeType == "[G]":
+                return 1
+            if self.BrakeType == "[P]":
+                return 0
         if self.BrakeType == "[G]":
             return 0
         if self.BrakeType == "[P]":
@@ -771,6 +793,9 @@ class Vehicle:
     
     def SetBM(self,BIndex):
         print("launched function")
+        if not self.BTT == 11:
+            if BIndex == 1:
+                BIndex = 0.5
         if self.BTT == -1:
             return 0
         if self.BTT == 0:
@@ -791,15 +816,13 @@ class Vehicle:
                     time.sleep(1)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.InputValue?Value=" + str(BIndex),headers = header)
         if self.BTT == 2:
-            try:
-                request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/PassengerGoodValve.InputValue?Value=" + str(BIndex),headers = header)
-            except requests.exceptions.ConnectionError as e:
-                time.sleep(1)
-                try :
-                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/PassengerGoodsValve.InputValue?Value=" + str(BIndex),headers = header)
-                except requests.exceptions.ConnectionError as e:
-                    time.sleep(1)
-                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/PassengerGoodsValve.InputValue?Value=" + str(BIndex),headers = header)
+            if BIndex == 0:
+                print("setting to G")
+                print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/PassengerGoodsValve.InputValue?Value=" + str(0.75),headers = header).url)
+                print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/PassengerGoodsValve.InputValue?Value=" + str(0.75),headers = header).json())
+            if BIndex == 1:
+                print("setting to P")
+                print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/PassengerGoodsValve.InputValue?Value=" + str(0),headers = header).json())
         if self.BTT == 3:
             try:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeSelector.InputValue?Value=" + str(BIndex),headers = header)
@@ -821,6 +844,12 @@ class Vehicle:
                     time.sleep(1)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeMode_Switch.InputValue?Value=" + str(BIndex),headers = header)
         if self.BTT == 5:
+            if BIndex == 1:
+                BIndex = 0.33
+            if BIndex == 2:
+                BIndex = 0.5
+            if BIndex == 3:
+                BIndex = 3
             try:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeMode.InputValue?Value=" + str(BIndex),headers = header)
             except requests.exceptions.ConnectionError as e:
@@ -888,6 +917,12 @@ class Vehicle:
                     time.sleep(1)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeMode_F.InputValue?Value=" + str(BIndex),headers = header)
         if self.BTT == 11:
+            if BIndex == 1:
+                BIndex = 0.33
+            if BIndex == 2:
+                BIndex = 0.66
+            if BIndex == 3:
+                BIndex = 1
             try:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeSelector_L.InputValue?Value=" + str(BIndex),headers = header)
             except requests.exceptions.ConnectionError as e:
@@ -937,6 +972,19 @@ class Vehicle:
                 except requests.exceptions.ConnectionError as e:
                     time.sleep(1)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeTimingSelector.InputValue?Value=" + str(BIndex),headers = header)
+        if self.BTT == 420:
+            try:
+                request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_L.InputValue?Value=" + str(BIndex),headers = header)
+                request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_R.InputValue?Value=" + str(BIndex),headers = header)
+            except requests.exceptions.ConnectionError as e:
+                time.sleep(1)
+                try :
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_L.InputValue?Value=" + str(BIndex),headers = header)
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_R.InputValue?Value=" + str(BIndex),headers = header)
+                except requests.exceptions.ConnectionError as e:
+                    time.sleep(1)
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_L.InputValue?Value=" + str(BIndex),headers = header)
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_R.InputValue?Value=" + str(BIndex),headers = header)
         return 1
 
 
@@ -1195,6 +1243,7 @@ class MainWindow(wx.Frame):
                         CurrentVehicle = Vehicle(VehName,i)
                         LogFile.write(str(CurrentVehicle.PrintData()))
                         res = CurrentVehicle.UpdateData()
+                        LogFile.write(f"res = {res}")
                         if res:
                             LogFile.write(f"searching data for vehicle with index = {i}")
                             FoundData = FindData(i)
@@ -1336,7 +1385,7 @@ class MainWindow(wx.Frame):
                                         BP = UpdateData['Entries'][i+1]['Values']['Pressure_PSI_G']
                                     if not str(UpdateData['Entries'][i+3]['Values']) == "None":
                                         BC = UpdateData['Entries'][i+3]['Values']['Pressure_PSI_G']
-                                if  not UpdateData['Entries'][i+4]['Values'] == "None":
+                                if  not str(UpdateData['Entries'][i+4]['Values']) == "None":
                                     BI = UpdateData['Entries'][i+4]['Values']['ReturnValue']
                                 if Had2BrakeSwitches:
                                     LogFile.write("entered here \n")
@@ -1350,7 +1399,7 @@ class MainWindow(wx.Frame):
                                 BCstr = "BC: " + str(BC)
                                 # updating the table
                                 LogFile.write(f"bi = {BI}")
-                                if not str(BI) == "False":
+                                if not BI == -1:
                                     Bistr = self.FormationList[int(i/5)].GetBM(BI,BI2)
                                     LogFile.write(f"i = {i} Bistr  = {Bistr}")
                                     if not Bistr == "None":
@@ -1475,5 +1524,5 @@ class MainWindow(wx.Frame):
 
 
 app = wx.App(False,"ProgramOutput.log")
-MainWindow = MainWindow(None, "Formation Viewer 0.3")
+MainWindow = MainWindow(None, "Formation Viewer 0.5.5")
 app.MainLoop()
