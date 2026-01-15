@@ -1524,5 +1524,5 @@ class MainWindow(wx.Frame):
 
 
 app = wx.App(False,"ProgramOutput.log")
-MainWindow = MainWindow(None, "Formation Viewer 0.5.5")
+MainWindow = MainWindow(None, "Formation Viewer 0.5.6")
 app.MainLoop()
