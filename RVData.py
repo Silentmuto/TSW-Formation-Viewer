@@ -386,7 +386,7 @@ VehicleData = {
         "isWagon": True,
     },
     "Bnrdfz" : {
-        "Weight": 0,
+        "Weight": 40,
         "BTT": 12,
         "BPT": 1,
         "BCT": 1,

@@ -11,11 +11,12 @@ now = datetime.now()
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-sys.stderr = open('errorlog.txt', 'w')
-sys.stdout = open('outputlog.txt', "w")
+#sys.stderr = open('errorlog.txt', 'w')
+#sys.stdout = open('outputlog.txt', "w")
 #subscription id = 42
 #add reverse display
-#pressure options
+#check ALL brakemodes, how they interact
+#check ic coaches brakemodes
 ListCtrlID = 2
 OnTopToggleID = 3
 OnTrTogID = 4
@@ -210,7 +211,7 @@ class Vehicle:
                 LogFile.flush() 
                 HasError = 1
 
-                
+
             if self.BTT == 1:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.Function.GetCurrentNotchIndex", headers = header).json()
                 if not ReqData['Result'] == "Error":
@@ -249,22 +250,11 @@ class Vehicle:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/BrakeMode_Switch.Function.GetCurrentNotchIndex", headers = header).json()
                 if not ReqData['Result'] == "Error":
                     BR = ReqData['Values']['ReturnValue']
-                    if str(self.Name) == "BR218":
-                        
-                        if BR == 0:
+                    if BR == 0:
                             self.BrakeType = "[G]"
-                        elif BR == 1:
+                    elif BR == 1:
                             self.BrakeType = "[P]"
-                        elif BR == 2:
-                            self.BrakeType = "[P2]"
-                        elif BR == 3:
-                            self.BrakeType = "[R]"
-                    else:
-                        if BR == 0:
-                            self.BrakeType = "[G]"
-                        elif BR == 1:
-                            self.BrakeType = "[P]"
-                        elif BR == 2:
+                    elif BR == 2:
                             self.BrakeType = "[R]"
             if self.BTT == 5:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/BrakeMode.Function.GetCurrentNotchIndex", headers = header).json()
@@ -404,6 +394,16 @@ class Vehicle:
                 self.CargoWeight = round(self.CargoWeight,1)
                 self.TotalWeight += self.CargoWeight
                 self.TotalWeight = round(self.TotalWeight,1)
+            if str(self.Name) == "BR218":
+                        
+                        if BR == 0:
+                            self.BrakeType = "[G]"
+                        elif BR == 1:
+                            self.BrakeType = "[P]"
+                        elif BR == 2:
+                            self.BrakeType = "[P2]"
+                        elif BR == 3:
+                            self.BrakeType = "[R]"
             #print(str(self.BTT) + "for vehicle")
             return HasError
     def SetSubs(self):
@@ -481,7 +481,7 @@ class Vehicle:
         if self.BTT == 11:
             request.post(tswapi + "/subscription/CurrentFormation/"+ str(self.index) + "/BrakeSelector_L.Function.GetCurrentNotchIndex?Subscription=42", headers = header).json() 
         if self.BTT == 12:
-            request.post(tswapi + "/subscription/CurrentFormation" +  str(self.index) + "/GPR_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header).json()
+            request.post(tswapi + "/subscription/CurrentFormation/" +  str(self.index) + "/GPR_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header).json()
         if self.BTT == 13:
             request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/BrakeSelector_R-MG.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
         if self.BTT == 14:
@@ -494,6 +494,29 @@ class Vehicle:
 
     def GetBM(self,BI,BI2 = 0):
         Bstr = "?"
+        if self.Name == "Bpmmbdzf":
+            if BI == 0:
+                return "[P]"
+            if BI == 1 :
+                return "[R]"
+            elif BI == 2:
+                return "[R+Mg]"
+        if self.Name == "Bpmbdzf":
+            if BI == 0:
+                return "[P]"
+            if BI == 1 :
+                return "[R]"
+            elif BI == 2:
+                return "[R+Mg]"
+        if self.Name == "BR218":    
+            if BI== 0:
+                return  "[G]"
+            elif BI == 1:
+                return  "[P]"
+            elif BI == 2:
+                return  "[P2]"
+            elif BI == 3:
+                return  "[R]"
         if self.BTT == 0:
             return "[?]"
         if self.BTT == -1:
@@ -626,11 +649,18 @@ class Vehicle:
                 return "[P]"
             elif BI == 2:
                 return "[R]"
+        return Bstr
     def GetPBM(self): #GetPossibleBrakeModes
+        if self.Name == "Bpmmbdzf":
+            return ["P","R","R+Mg"]
+        if self.Name == "Bpmmbdzf":
+            return ["P","R","R+Mg"]
         if self.BTT == -1:
             return ["G"]
         if self.BTT == 0:
             return ["[?]"]
+        if self.Name == "BR218":
+                return ["G","P","P2","R"]
         if self.BTT == 1:
             if not self.Name == "Laaers":
                 return ["G","P"]
@@ -641,9 +671,6 @@ class Vehicle:
         if self.BTT == 3:
             return ["G","P","R"]
         if self.BTT == 4:
-            if self.Name == "BR218":
-                return ["G","P","P2","R"]
-            else:
                 return ["G", "P","R"]
         if self.BTT == 5:
             return ["G","P","R"]
@@ -671,27 +698,40 @@ class Vehicle:
             return ["G","P","R"]
         return  ["?"]
     def GetBMInt(self):
+        if self.Name == "Bpmmbdzf":
+            if self.BrakeType == "[P]":
+                return 0
+            if self.BrakeType == "[R]":
+                return 1
+            if self.BrakeType == "[R+Mg]":
+                return 2
+        if self.Name == "Bpmbdzf":
+            if self.BrakeType == "[P]":
+                return 0
+            if self.BrakeType == "[R]":
+                return 1
+            if self.BrakeType == "[R+Mg]":
+                return 2
         if self.BTT == -1:
             return 0
         if self.BTT == 0:
             return 0
+        if self.Name == "BR218":
+            if self.BrakeType == "[G]":
+                return 0
+            if self.BrakeType == "[P]":
+                return 1
+            if self.BrakeType == "[P2]":
+                return 2
+            if self.BrakeType == "[R]":
+                return 3
         if self.BTT == 4:
-            if str(self.Name) == "BR218":
-                if self.BrakeType == "[G]":
-                    return 0
-                if self.BrakeType == "[P]":
-                    return 1
-                if self.BrakeType == "[P2]":
-                        return 2
-                if self.BrakeType == "[R]":
-                        return 3
-            else:
-                        if self.BrakeType == "[G]":
-                            return 0
-                        if self.BrakeType == "[P]":
-                            return 1
-                        if self.BrakeType =="[R]":
-                            return 2
+            if self.BrakeType == "[G]":
+                return 0
+            if self.BrakeType == "[P]":
+                return 1
+            if self.BrakeType =="[R]":
+                return 2
         if self.BTT == 11:
             if self.BrakeType == "[G]":
                 return 0
@@ -897,6 +937,7 @@ class Vehicle:
                 except requests.exceptions.ConnectionError as e:
                     time.sleep(1)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeTimingSelector.InputValue?Value=" + str(BIndex),headers = header)
+        return 1
 
 
 def FindData(index):
@@ -1313,8 +1354,7 @@ class MainWindow(wx.Frame):
                                     Bistr = self.FormationList[int(i/5)].GetBM(BI,BI2)
                                     LogFile.write(f"i = {i} Bistr  = {Bistr}")
                                     if not Bistr == "None":
-                                        self.FormationListUI.SetTextValue(Bistr,int(i/5),2)
-                                        self.ChoiceControlWindow.BrakeChoiceList[int(i/5)].SetSelection(BI)
+                                        res = self.FormationListUI.SetTextValue(Bistr,int(i/5),2)
                                     else:
                                         self.FormationListUI.SetTextValue("?",int(i/5),2)
                                     
@@ -1434,6 +1474,6 @@ class MainWindow(wx.Frame):
 
 
 
-app = wx.App(True,"ProgramOutput.log")
-MainWindow = MainWindow(None, "Formation Viewer 0.2")
+app = wx.App(False,"ProgramOutput.log")
+MainWindow = MainWindow(None, "Formation Viewer 0.3")
 app.MainLoop()
