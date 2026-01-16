@@ -57,18 +57,41 @@ LogFile.flush()
 def RequestUpdate():
      UpdateData = 0
      Vh = 0
+     SkipToRebuild = 0
      while 1:
+            SkipToRebuild = 0
             if not MainWindow.Rebuilding:
                 try:
                     isForm = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header).json()
+                    vname = request.get(tswapi + "/get/CurrentFormation/0.ObjectName ", headers = header).json()
+                    vname = vname['Values']['ObjectName']
+                    fname = vname.split("_")
+                    VehName = GetVehicleName(vname)
+                    vname = request.get(tswapi + "/get/CurrentFormation/1.ObjectName ", headers = header).json()
+                    vname = vname['Values']['ObjectName']
+                    fname = vname.split("_")
+                    VehName2 = GetVehicleName(vname)
+                    print(f"Vehname = {VehName} VehName2 = {VehName2}")
+                    if not VehName == MainWindow.FormationList[0].Name:
+                        SkipToRebuild = 1
+                    if not VehName2 == MainWindow.FormationList[1].Name:
+                        SkipToRebuild = 1
                 except requests.exceptions.ConnectionError as e:
                     continue
                 if not isForm['Result'] == "Error":
                     Vh = isForm['Values']['FormationLength']
                     if Vh == MainWindow.VehCount :
-                        try:
-                            UpdateData = request.get(tswapi + "/subscription?Subscription=42", headers = header).json()
-                        except requests.exceptions.ConnectionError as e:
+                        if not SkipToRebuild:
+                            try:
+                                UpdateData = request.get(tswapi + "/subscription?Subscription=42", headers = header).json()
+                            except requests.exceptions.ConnectionError as e:
+                                time.sleep(1)
+                        else:
+                            print("Formation Changed")
+                            Vh = 0
+                            LogFile.write("Formation Changed, Rebuilding... \n")
+                            LogFile.flush() # Add this line
+                            wx.CallAfter(MainWindow.RebuildFormation)
                             time.sleep(1)
                     else:
                         print("Formation Changed")
@@ -663,6 +686,12 @@ class Vehicle:
                 return "[P]"
         return Bstr
     def GetPBM(self): #GetPossibleBrakeModes
+        if self.Name == "Kijls":
+            return ["G","P"]
+        if self.Name == "Kijls450":
+            return ['G',"P"]
+        if self.Name == "BR140":
+            return ["G","P"]
         if self.Name == "Bpmmbdzf":
             return ["P","R","R+Mg"]
         if self.Name == "Bpmmbdzf":
@@ -794,18 +823,14 @@ class Vehicle:
     def SetBM(self,BIndex):
         print("launched function")
         if not self.BTT == 11:
-            if BIndex == 1:
-                BIndex = 0.5
+            if not self.BTT == 5:
+                if BIndex == 1:
+                    BIndex = 0.5
         if self.BTT == -1:
             return 0
         if self.BTT == 0:
             return 0
         if self.BTT == 1:
-            if self.Name == "Laaers":
-                if BIndex == 0:
-                    BIndex = 1
-                else:
-                    BIndex = 0
             try:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.InputValue?Value=" + str(BIndex),headers = header)
             except requests.exceptions.ConnectionError as e:
@@ -844,14 +869,20 @@ class Vehicle:
                     time.sleep(1)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeMode_Switch.InputValue?Value=" + str(BIndex),headers = header)
         if self.BTT == 5:
-            if BIndex == 1:
-                BIndex = 0.33
-            if BIndex == 2:
-                BIndex = 0.5
-            if BIndex == 3:
-                BIndex = 3
+            if self.Name == "BR218":
+                if BIndex == 1:
+                    BIndex = 0.33
+                if BIndex == 2:
+                    BIndex = 0.5
+                if BIndex == 3:
+                    BIndex = 3
+            else:
+                if BIndex == 1:
+                    BIndex = 0.5
+                if BIndex == 2:
+                    BIndex = 1
             try:
-                request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeMode.InputValue?Value=" + str(BIndex),headers = header)
+                print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeMode.InputValue?Value=" + str(BIndex),headers = header).url)
             except requests.exceptions.ConnectionError as e:
                 time.sleep(1)
                 try :
@@ -917,21 +948,30 @@ class Vehicle:
                     time.sleep(1)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeMode_F.InputValue?Value=" + str(BIndex),headers = header)
         if self.BTT == 11:
-            if BIndex == 1:
-                BIndex = 0.33
-            if BIndex == 2:
-                BIndex = 0.66
-            if BIndex == 3:
-                BIndex = 1
+            if not self.Name == "Bpmmbdzf":
+                if BIndex == 1:
+                    BIndex = 0.33
+                if BIndex == 2:
+                    BIndex = 0.66
+                if BIndex == 3:
+                    BIndex = 1
+            else:
+                if BIndex == 1:
+                    BIndex = 0.5
+                if BIndex == 2:
+                    BIndex = 1
             try:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeSelector_L.InputValue?Value=" + str(BIndex),headers = header)
+                request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeSelector_R.InputValue?Value=" + str(BIndex),headers = header)
             except requests.exceptions.ConnectionError as e:
                 time.sleep(1)
                 try :
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeSelector_L.InputValue?Value=" + str(BIndex),headers = header)
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeSelector_R.InputValue?Value=" + str(BIndex),headers = header)
                 except requests.exceptions.ConnectionError as e:
                     time.sleep(1)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeSelector_L.InputValue?Value=" + str(BIndex),headers = header)
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/BrakeSelector_R.InputValue?Value=" + str(BIndex),headers = header)
         if self.BTT == 12:
             try:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/GPR_BrakeSelector.InputValue?Value=" + str(BIndex),headers = header)
@@ -1404,6 +1444,8 @@ class MainWindow(wx.Frame):
                                     LogFile.write(f"i = {i} Bistr  = {Bistr}")
                                     if not Bistr == "None":
                                         res = self.FormationListUI.SetTextValue(Bistr,int(i/5),2)
+                                        if BI != self.ChoiceControlWindow.BrakeChoiceList[int(i/5)].GetSelection():
+                                            self.ChoiceControlWindow.BrakeChoiceList[int(i/5)].SetSelection(BI)
                                     else:
                                         self.FormationListUI.SetTextValue("?",int(i/5),2)
                                     
@@ -1433,6 +1475,7 @@ class MainWindow(wx.Frame):
         MainWindow.ClearList()
         LogFile.write("Rebuilding Formation \n")
         LogFile.flush() # Add this line
+        requests.delete(tswapi + "/subscription/?Subscription=42", headers = header)
         self.WindowSizer.Detach(self.ChoiceControlWindow)
         self.ChoiceControlWindow.ClearLists()
         self.ChoiceControlWindow.Destroy()
@@ -1523,6 +1566,6 @@ class MainWindow(wx.Frame):
 
 
 
-app = wx.App(False,"ProgramOutput.log")
-MainWindow = MainWindow(None, "Formation Viewer 0.5.6")
+app = wx.App(True,"ProgramOutput.log")
+MainWindow = MainWindow(None, "Formation Viewer 0.5.7")
 app.MainLoop()
