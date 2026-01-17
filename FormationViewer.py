@@ -64,20 +64,23 @@ def RequestUpdate():
                 try:
                     isForm = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header).json()
                     vname = request.get(tswapi + "/get/CurrentFormation/0.ObjectName ", headers = header).json()
-                    vname = vname['Values']['ObjectName']
-                    fname = vname.split("_")
-                    VehName = GetVehicleName(vname)
-                    vname = request.get(tswapi + "/get/CurrentFormation/1.ObjectName ", headers = header).json()
-                    vname = vname['Values']['ObjectName']
-                    fname = vname.split("_")
-                    VehName2 = GetVehicleName(vname)
-                    print(f"Vehname = {VehName} VehName2 = {VehName2}")
-                    if not VehName == MainWindow.FormationList[0].Name:
-                        SkipToRebuild = 1
-                    if not VehName2 == MainWindow.FormationList[1].Name:
-                        SkipToRebuild = 1
+                    if not vname['Result'] == "Error":
+                        vname = vname['Values']['ObjectName']
+                        fname = vname.split("_")
+                        VehName = GetVehicleName(vname)
+                        vname = request.get(tswapi + "/get/CurrentFormation/1.ObjectName ", headers = header).json()
+                        vname = vname['Values']['ObjectName']
+                        fname = vname.split("_")
+                        VehName2 = GetVehicleName(vname)
+                        print(f"Vehname = {VehName} VehName2 = {VehName2}")
+                        if MainWindow.VehCount:
+                            if not VehName == MainWindow.FormationList[0].Name:
+                                SkipToRebuild = 1
+                            if not VehName2 == MainWindow.FormationList[1].Name:
+                                SkipToRebuild = 1
                 except requests.exceptions.ConnectionError as e:
                     continue
+                print(isForm)
                 if not isForm['Result'] == "Error":
                     Vh = isForm['Values']['FormationLength']
                     if Vh == MainWindow.VehCount :
@@ -1566,6 +1569,6 @@ class MainWindow(wx.Frame):
 
 
 
-app = wx.App(True,"ProgramOutput.log")
+app = wx.App(False,"ProgramOutput.log",)
 MainWindow = MainWindow(None, "Formation Viewer 0.5.7")
 app.MainLoop()
