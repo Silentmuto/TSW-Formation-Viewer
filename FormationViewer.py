@@ -7,16 +7,14 @@ import threading
 import sys
 from datetime import datetime
 import wx.dataview
-now = datetime.now()
+import psutil
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from pathlib import Path
 
-#sys.stderr = open('errorlog.txt', 'w')
-#sys.stdout = open('outputlog.txt', "w")
 #subscription id = 42
 #add reverse display
-#check ALL brakemodes, how they interact
-#check ic coaches brakemodes
+
 ListCtrlID = 2
 OnTopToggleID = 3
 OnTrTogID = 4
@@ -24,11 +22,12 @@ PressureChoiceID = 5
 BrakeChoiceID = 6
 Toggle5ID = 7
 ToggleAllID = 8
+DstrID = 9
 PU = 0
 tswapi = "http://127.0.0.1:31270"   
-from pathlib import Path
+now = datetime.now()
 
-# This gets the home directory (e.g., /Users/name or C:\Users\name)
+#searching for the key
 documents_path = Path.home() / "Documents/My Games/TrainSimWorld6/Saved/Config" 
 abc = str(documents_path)
 abc = abc + "/CommAPIKey.txt"
@@ -37,7 +36,7 @@ apifile = open(abc ,"r")
 ApiKey = apifile.read()
 
 header = {"DTGCommKey": ApiKey }
-retry_strategy = Retry(
+retry_strategy = Retry(  
     total=None,          
     backoff_factor=1,      
     status_forcelist=[429, 500, 502, 503, 504],
@@ -54,71 +53,13 @@ LogFile.write(str(now))
 LogFile.write("\n")
 LogFile.flush() 
 
-def RequestUpdate():
-     UpdateData = 0
-     Vh = 0
-     SkipToRebuild = 0
-     while 1:
-            SkipToRebuild = 0
-            if not MainWindow.Rebuilding:
-                try:
-                    isForm = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header).json()
-                    vname = request.get(tswapi + "/get/CurrentFormation/0.ObjectName ", headers = header).json()
-                    if not vname['Result'] == "Error":
-                        vname = vname['Values']['ObjectName']
-                        fname = vname.split("_")
-                        VehName = GetVehicleName(vname)
-                        vname = request.get(tswapi + "/get/CurrentFormation/1.ObjectName ", headers = header).json()
-                        vname = vname['Values']['ObjectName']
-                        fname = vname.split("_")
-                        VehName2 = GetVehicleName(vname)
-                        print(f"Vehname = {VehName} VehName2 = {VehName2}")
-                        if MainWindow.VehCount:
-                            if not VehName == MainWindow.FormationList[0].Name:
-                                SkipToRebuild = 1
-                            if not VehName2 == MainWindow.FormationList[1].Name:
-                                SkipToRebuild = 1
-                except requests.exceptions.ConnectionError as e:
-                    continue
-                print(isForm)
-                if not isForm['Result'] == "Error":
-                    Vh = isForm['Values']['FormationLength']
-                    if Vh == MainWindow.VehCount :
-                        if not SkipToRebuild:
-                            try:
-                                UpdateData = request.get(tswapi + "/subscription?Subscription=42", headers = header).json()
-                            except requests.exceptions.ConnectionError as e:
-                                time.sleep(1)
-                        else:
-                            print("Formation Changed")
-                            Vh = 0
-                            LogFile.write("Formation Changed, Rebuilding... \n")
-                            LogFile.flush() # Add this line
-                            wx.CallAfter(MainWindow.RebuildFormation)
-                            time.sleep(1)
-                    else:
-                        print("Formation Changed")
-                        Vh = 0
-                        LogFile.write("Formation Changed, Rebuilding... \n")
-                        LogFile.flush() # Add this line
-                        wx.CallAfter(MainWindow.RebuildFormation)
-                        time.sleep(1)
-                else:
-                    try :
-                        requests.delete(tswapi + "/subscription/?Subscription=42", headers = header).json()
-                    except requests.exceptions.ConnectionError as e:
-                        time.sleep(1)
-                        requests.delete(tswapi + "/subscription/?Subscription=42", headers = header).json()
-                    VehCount = 0
-                    MainWindow.SetStatusText("No formation found")
-                    if MainWindow.VehCount:
-                        wx.CallAfter(MainWindow.ClearList)
-                    time.sleep(1)
-                if Vh:
-                    if UpdateData:
-                        wx.CallAfter(MainWindow.OnRefresh,UpdateData)
-            time.sleep(0.5)
-     
+def IsTSWOpen():
+    for p in psutil.process_iter():
+       if p.name()  == 'TrainSimWorld.exe':
+            return 1
+    return 0
+
+
 def GetVehicleName(ObjectName):
     vname = ObjectName
     fname = vname
@@ -157,6 +98,7 @@ class Vehicle:
     TotalWeight = 0
     CargoWeight = 0
     index = 0
+    DType = 0
     def __init__(self,Vname,index):
         self.Name = Vname
         #print(Vname)
@@ -191,7 +133,7 @@ class Vehicle:
             return [self.Name, "BTT = " + str(self.BTT), "BPT = " + str(self.BPT),"BCT = " + str(self.BCT)]
     
     def ReturnSequence(self):
-         return [self.Name, self.BrakeType, "BP: " + str(self.BP), "BC: " + str(self.BC), str(self.TotalWeight), str(self.CargoWeight)]
+         return [self.Name, self.BrakeType, "BP: " + str(self.BP), "BC: " + str(self.BC), "Weight: " + str(self.TotalWeight)+"T", "Load: "+str(self.CargoWeight)+"T"]
        
     def UpdateData(self):
             HasError = 0
@@ -481,11 +423,11 @@ class Vehicle:
         #subs for BTT
         if self.BTT == 0:
             self.BrakeType = "[?]"
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/RailVehiclePhysicsComponent0.Function.IsDerailed?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBSW?Subscription=42", headers = header)
         if self.BTT == -1:
             self.BrakeType = "[?]"
             #print("no switch")
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/RailVehiclePhysicsComponent0.Function.IsDerailed?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBSW?Subscription=42", headers = header)
         if self.BTT == 1:
             request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
         if self.BTT == 2:
@@ -520,6 +462,21 @@ class Vehicle:
         if self.BTT == 420:
             request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_L.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
             request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_R.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+        TestData = request.get(tswapi + "/list/CurrentFormation/" + str(self.index)+ "/DistributerCutOff/",headers = header).json()
+        if not TestData['Result'] == "Error":
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributerCutOff.Function.GetCurrentNotchIndex?Subscription=42",headers = header)
+            self.DType = 1
+        else:
+            TestData = request.get(tswapi + "/list/CurrentFormation/" + str(self.index)+ "/DistributerCutOut/",headers = header).json()
+            if not TestData['Result'] == "Error":
+                request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/DistributerCutOut.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            else:
+                TestData = request.get(tswapi + "/list/CurrentFormation/" + str(self.index)+ "/DistributorIsolatingValve/",headers = header).json()
+                if not TestData['Result'] == "Error":
+                    request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributorIsolatingValve.Function.GetCurrentNotchIndex?Subscription=42",headers = header)
+                else:
+                    request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NODistributor?Subscription=42",headers = header)
+        
 
     def GetBM(self,BI,BI2 = 0):
         Bstr = "?"
@@ -1028,6 +985,7 @@ class Vehicle:
                     time.sleep(1)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_L.InputValue?Value=" + str(BIndex),headers = header)
                     request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_R.InputValue?Value=" + str(BIndex),headers = header)
+        
         return 1
 
 
@@ -1162,33 +1120,47 @@ def FindData(index):
                                                                 LogFile.flush() # Add this line
 
     return [BTT,BPT,BCT,isWagon,Weight]
-def OnTopToggleF(self):
-            MainWindow.ToggleWindowStyle(wx.STAY_ON_TOP)
-class BrakeChoiceControl(wx.Choice):
+
+class VehicleChoiceControl(wx.Choice):
     index = 0
-    def Create(self,parent,vpos,validChoices,CurrentBrake = 0):
+    def Create(self,parent,vpos,TypeID,validChoices,CurrentChoice = 0):
         self.index = vpos
-        wx.Choice.Create(self,parent,BrakeChoiceID,choices = validChoices)
-        self.SetSelection(CurrentBrake)
+        wx.Choice.Create(self,parent,TypeID,choices = validChoices)
+        self.SetSelection(CurrentChoice)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+
+    def OnEraseBackground(self, event):
+        pass 
 class ChoiceWindow(wx.ScrolledWindow):
-    def __init__(self,parent,pos,size):
-        wx.ScrolledWindow.__init__(self,parent,wx.ID_ANY,pos,size, style=wx.VSCROLL | wx.ALWAYS_SHOW_SB)
+    def __init__(self,parent):
+        wx.ScrolledWindow.__init__(self,parent,wx.ID_ANY, style=wx.VSCROLL | wx.ALWAYS_SHOW_SB)
         self.StaticPosText = []
         self.BrakeChoiceList = []
+        self.DstrChoice = []
         self.lay = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.lay)
+        self.lay.SetSizeHints(self)
+        self.SetBackgroundColour(colour= [0,0,0])
         self.lay.Layout()
         self.FitInside()
         self.SetScrollRate(0, 20)
-    def CreateBrakeControl(self,i,ValidChoices,CBrake):
-                statictext = wx.StaticText(self,wx.ID_ANY,str(i),style = wx.ALIGN_LEFT)
-                brakechoice = BrakeChoiceControl()
-                brakechoice.Create( self,i,ValidChoices,CBrake)
+    def CreateVehicleControl(self,i,ValidChoices,CBrake):
+                statictext = wx.StaticText(self,wx.ID_ANY,str(i),style = wx.ALIGN_CENTER)
+                statictext.SetForegroundColour(colour = [255,253,208])
+                brakechoice = VehicleChoiceControl()
+                brakechoice.Create(self,i,BrakeChoiceID,ValidChoices,CBrake)
+                brakechoice.SetBackgroundColour(colour = [0,0,0])
+                brakechoice.SetForegroundColour(colour = [255,253,208])
+                DChoice = VehicleChoiceControl()
+                DChoice.Create(self,i,DstrID,["Close","Open"],1)
+                DChoice.SetSelection(1)
+                self.DstrChoice.append(DChoice)
                 self.StaticPosText.append(statictext)
                 self.BrakeChoiceList.append(brakechoice)
                 self.ControlSizer = wx.BoxSizer(wx.HORIZONTAL)
-                self.ControlSizer.Add(statictext,0, wx.ALL | wx.CENTER,0)
-                self.ControlSizer.Add(brakechoice,0,wx.ALL)
+                self.ControlSizer.Add(statictext,0,wx.CENTER | wx.LEFT | wx.RIGHT ,5)
+                self.ControlSizer.Add(brakechoice,1,wx.ALL)
+                self.ControlSizer.Add(DChoice,1,wx.LEFT,5)
                 self.lay.Add(self.ControlSizer)
 
     def RebuildLayout(self):
@@ -1198,7 +1170,7 @@ class ChoiceWindow(wx.ScrolledWindow):
         self.StaticPosText.clear()
         self.BrakeChoiceList.clear()
         
-class MainWindow(wx.Frame):
+class MainWindowClass(wx.Frame):
     FormationList = []
     SkipCurrent = 0
     rindex = 0
@@ -1213,142 +1185,173 @@ class MainWindow(wx.Frame):
     DoubleBrakeSwitchCount = 0
     def __init__(self, parent, title):
         
-        LogFile.write(str(requests.delete(tswapi + "/subscription/?Subscription=42", headers = header).json()))
-        self.UpdateThread = threading.Thread(target=RequestUpdate)
         LogFile.write("Initializing Frame \n")
         LogFile.flush() 
         wx.Frame.__init__(self,parent,title = title, size = (620,500))
+        self.PBar = wx.StatusBar(self)
+        self.statustext = wx.StaticText(self.PBar,label = "Test Text",pos = (5,5))
+        self.statustext.SetForegroundColour(colour = [255,253,208])
+        self.PBar.SetBackgroundColour(colour= [0,0,0])
         self.ListSizer = wx.BoxSizer(wx.VERTICAL)
         self.WindowSizer = wx.BoxSizer(wx.HORIZONTAL)
         LogFile.write("Frame + sizers Initialized \n")
         LogFile.flush() 
-        #self.Button = wx.Button(self,330,"Press ME",(650,100))
-        self.FormationListUI = wx.dataview.DataViewListCtrl(self,ListCtrlID,pos = (0,0),size = (500,400)) #
+        self.FormationListUI = wx.dataview.DataViewListCtrl(self,ListCtrlID,style = wx.dataview.DV_NO_HEADER) #style 
         self.FormationListUI.AppendTextColumn("I",width = 25)
         self.FormationListUI.AppendTextColumn("Name")
-        self.FormationListUI.AppendTextColumn("BM")
+        self.FormationListUI.AppendTextColumn("BM",width =50)
         self.FormationListUI.AppendTextColumn("BP")
         self.FormationListUI.AppendTextColumn("BC")
         self.FormationListUI.AppendTextColumn("Weight", width = 70)
         self.FormationListUI.AppendTextColumn("Load", width = 70)
-        self.FormationListUI.SetBackgroundColour(colour= [99,109,117])
+        self.FormationListUI.SetBackgroundColour(colour= [0,0,0])
         self.FormationListUI.SetForegroundColour(colour = [255,253,208])
-        self.OnTopToggle = wx.CheckBox(self,OnTopToggleID,label = "Stay on Top", pos = (0,430))
-        self.PressureUnitChoice = wx.Choice(self,PressureChoiceID,(0,450),(50,30),["BAR", "PSI"],name= "Pressure Unit Choice")
-        self.ChoiceControlWindow = ChoiceWindow(self,(510,25),(100,375))
-        self.Toggle5Button = wx.Button(self,Toggle5ID,"Toggle First 5",(0,480))
-        self.ToggleAllButton = wx.Button(self,ToggleAllID,"Toggle All Wagons",(0,510))
+        self.OnTopToggle = wx.CheckBox(self,OnTopToggleID,label = "Stay on Top")
+        self.OnTopToggle.SetForegroundColour(colour = [255,253,208])
+        self.PressureUnitChoice = wx.Choice(self,PressureChoiceID,choices = ["BAR", "PSI"],name= "Pressure Unit Choice")
+        self.VehControlWindow = ChoiceWindow(self)
+        self.Toggle5Button = wx.Button(self,Toggle5ID,"Toggle First 5")
+        self.Toggle5Button.SetBackgroundColour(colour = [0,0,0])
+        self.Toggle5Button.SetForegroundColour(colour = [255,253,208])
+        self.ToggleAllButton = wx.Button(self,ToggleAllID,"Toggle All Wagons")
+        self.ToggleAllButton.SetBackgroundColour(colour = [0,0,0])
+        self.ToggleAllButton.SetForegroundColour(colour = [255,253,208])
         self.PressureUnitChoice.SetSelection(0)
         self.ListSizer.Add(self.FormationListUI,1,wx.EXPAND)
         self.ListSizer.Add(self.OnTopToggle,0)
         self.ListSizer.Add(self.PressureUnitChoice,0)
         self.ListSizer.Add(self.Toggle5Button,0)
         self.ListSizer.Add(self.ToggleAllButton,0)
-        self.SetBackgroundColour(colour= [99,109,117])  
-        ReqData = request.get(tswapi + "/list/CurrentFormation", headers = header).json()
+        self.SetBackgroundColour(colour= [0,0,0])
+        self.SetForegroundColour(colour = [255,253,208])
         #self.OptionsBar = wx.MenuBar();
         #self.OptionsMenu = wx.Menu("Options")
         #self.OptionsBar.Append(self.OptionsMenu,"Options")
         #self.SetMenuBar(self.OptionsBar)        
-        self.CreateStatusBar()
-        if ReqData['Result'] == "Error":
-            self.SetStatusText("Waiting for formation")
-            LogFile.write("Waiting for formation...")
-            LogFile.flush() # Add this line
-        else:
-
-            self.text = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header)
-            self.text = self.text.json()
-            self.fl = int(self.text['Values']['FormationLength'])
-            self.VehCount = self.fl
-            LogFile.write("Detected " + str(self.VehCount) + " vehicles \n")
-            LogFile.flush() 
-            self.FormationLength = 0.0
-            self.FormationList = []
-            for i in range(self.fl):
-                    self.SkipCurrent = 0
-                    vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).json()
-                    vname = vname['Values']['ObjectName']
-                    fname = vname.split("_")
-                    VehName = GetVehicleName(vname)
-                    print(VehName)
-                    LogFile.write("Detected " + vname + " at position " + str(i) + "with reference name " + VehName + "\n")
-                    LogFile.flush() 
-                    Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetDirection", headers = header).json()
-                    if not Data['Result'] == "Error":
-                        self.LocoCount += 1
-                    if VehName == "Laaers":
-                        if fname[3] == "B":
-                            self.SkipCurrent = 1
-                        if fname[2] == "B":
-                            self.SkipCurrent = 1
-                    if not self.SkipCurrent:
-                        CurrentVehicle = Vehicle(VehName,i)
-                        LogFile.write(str(CurrentVehicle.PrintData()))
-                        res = CurrentVehicle.UpdateData()
-                        LogFile.write(f"res = {res}")
-                        if res:
-                            LogFile.write(f"searching data for vehicle with index = {i}")
-                            FoundData = FindData(i)
-                            CurrentVehicle.BTT = FoundData[0]
-                            CurrentVehicle.BPT = FoundData[1]
-                            CurrentVehicle.BCT = FoundData[2]
-                            CurrentVehicle.isWagon = FoundData[3]
-                            CurrentVehicle.CargoWeight = FoundData[4]
-                            res = CurrentVehicle.UpdateData()
-
-                        LogFile.write(str(CurrentVehicle.PrintData()))
-                        if not str(CurrentVehicle.BTT) == str(0):
-                            self.HasGPRSwitch = 1
-
-                        self.FormationList.append(CurrentVehicle)
-                        LogFile.write("Adding Vehicle to UI list \n")
-                        LogFile.flush() # Add this line
-                        idx = self.FormationListUI.GetItemCount()
-                        itemlist = []
-                        itemlist.append(str(idx))
-                        itemlist += CurrentVehicle.ReturnSequence()
-                        self.FormationListUI.AppendItem(itemlist)
-                        CurrentVehicle.SetSubs()
-                        if CurrentVehicle.BTT == 7:
-                            self.DoubleBrakeSwitchCount += 1
-                        if CurrentVehicle.BTT == 420:
-                            self.DoubleBrakeSwitchCount += 1
-            CC = self.FormationListUI.GetItemCount()
-            if self.HasGPRSwitch:
-                self.Toggle5Button.Show()
-                self.ToggleAllButton.Show()
-                self.FormationListUI.GetColumn(2).SetHidden(0)
-                for i in range(CC):
-                    PBM = self.FormationList[i].GetPBM()
-                    BMI = self.FormationList[i].GetBMInt()
-                    print(f"for i = {i} PBM = {PBM} BMI = {BMI} BTT = {self.FormationList[i].BTT}")
-                    self.ChoiceControlWindow.CreateBrakeControl(i,PBM,BMI)
+        self.SetStatusBar(self.PBar)
+        if IsTSWOpen():
+            LogFile.write(str(requests.delete(tswapi + "/subscription/?Subscription=42", headers = header).json()))
+            ReqData = request.get(tswapi + "/list/CurrentFormation", headers = header).json()
+            if ReqData['Result'] == "Error":
+                self.statustext.SetLabel("Waiting for formation")
+                LogFile.write("Waiting for formation...")
+                LogFile.flush() # Add this line
             else:
-                self.Toggle5Button.Hide()
-                self.ToggleAllButton.Hide()
-                self.FormationListUI.GetColumn(2).SetHidden(1)
-        self.ChoiceControlWindow.RebuildLayout()
-        self.WindowSizer.Add(self.ListSizer,1 ,wx.EXPAND)
-        self.WindowSizer.Add(self.ChoiceControlWindow,1,wx.EXPAND)
+
+                self.text = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header)
+                self.text = self.text.json()
+                self.fl = int(self.text['Values']['FormationLength'])
+                self.VehCount = self.fl
+                LogFile.write("Detected " + str(self.VehCount) + " vehicles \n")
+                LogFile.flush() 
+                self.FormationLength = 0.0
+                self.FormationList = []
+                for i in range(self.fl):
+                        self.SkipCurrent = 0
+                        vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).json()
+                        vname = vname['Values']['ObjectName']
+                        fname = vname.split("_")
+                        VehName = GetVehicleName(vname)
+                        print(VehName)
+                        LogFile.write("Detected " + vname + " at position " + str(i) + "with reference name " + VehName + "\n")
+                        LogFile.flush() 
+                        Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetDirection", headers = header).json()
+                        if not Data['Result'] == "Error":
+                            self.LocoCount += 1
+                        if VehName == "Laaers":
+                            if fname[3] == "B":
+                                self.SkipCurrent = 1
+                            if fname[2] == "B":
+                                self.SkipCurrent = 1
+                        if not self.SkipCurrent:
+                            CurrentVehicle = Vehicle(VehName,i)
+                            LogFile.write(str(CurrentVehicle.PrintData()))
+                            res = CurrentVehicle.UpdateData()
+                            LogFile.write(f"res = {res}")
+                            if res:
+                                LogFile.write(f"searching data for vehicle with index = {i}")
+                                FoundData = FindData(i)
+                                CurrentVehicle.BTT = FoundData[0]
+                                CurrentVehicle.BPT = FoundData[1]
+                                CurrentVehicle.BCT = FoundData[2]
+                                CurrentVehicle.isWagon = FoundData[3]
+                                CurrentVehicle.CargoWeight = FoundData[4]
+                                res = CurrentVehicle.UpdateData()
+
+                            LogFile.write(str(CurrentVehicle.PrintData()))
+                            if not str(CurrentVehicle.BTT) == str(0):
+                                self.HasGPRSwitch = 1
+
+                            self.FormationList.append(CurrentVehicle)
+                            LogFile.write("Adding Vehicle to UI list \n")
+                            LogFile.flush() # Add this line
+                            idx = self.FormationListUI.GetItemCount()
+                            itemlist = []
+                            itemlist.append(str(idx))
+                            itemlist += CurrentVehicle.ReturnSequence()
+                            self.FormationListUI.AppendItem(itemlist)
+                            CurrentVehicle.SetSubs()
+                            if CurrentVehicle.BTT == 7:
+                                self.DoubleBrakeSwitchCount += 1
+                            if CurrentVehicle.BTT == 420:
+                                self.DoubleBrakeSwitchCount += 1
+                CC = self.FormationListUI.GetItemCount()
+                if self.HasGPRSwitch:
+                    self.Toggle5Button.Show()
+                    self.ToggleAllButton.Show()
+                    self.FormationListUI.GetColumn(2).SetHidden(0)
+                    for i in range(CC):
+                        PBM = self.FormationList[i].GetPBM()
+                        BMI = self.FormationList[i].GetBMInt()
+                        #print(f"for i = {i} PBM = {PBM} BMI = {BMI} BTT = {self.FormationList[i].BTT}")
+                        self.VehControlWindow.CreateVehicleControl(i,PBM,BMI)
+                else:
+                    self.Toggle5Button.Hide()
+                    self.ToggleAllButton.Hide()
+                    self.FormationListUI.GetColumn(2).SetHidden(1)
+        self.VehControlWindow.RebuildLayout()
+        self.WindowSizer.Add(self.ListSizer,2 ,wx.EXPAND)
+        self.WindowSizer.Add(self.VehControlWindow,1,wx.EXPAND)
         self.SetSizer(self.WindowSizer)
         self.WindowSizer.Layout()
         self.LocoCount = self.LocoCount -1
-        self.ChoiceControlWindow.Show()
+        self.VehControlWindow.Show()
         self.Show(True)
         self.Center()
 
         LogFile.write("Opening Update Thread \n")
-        LogFile.flush() # Add this line
-        self.UpdateThread.daemon = True
-        self.UpdateThread.start()
-        self.Bind(wx.EVT_CHECKBOX,OnTopToggleF,id = OnTopToggleID)
+        LogFile.flush() 
+        self.statustext.SetLabel("Displaying Formation")
+
+        self.Bind(wx.EVT_CHECKBOX,self.OnTopToggleF,id = OnTopToggleID)
         self.Bind(wx.EVT_CHOICE,self.OnSelection,id = PressureChoiceID)
         self.Bind(wx.EVT_CHOICE, self.OnBrakeChoice,id =BrakeChoiceID)
         self.Bind(wx.EVT_BUTTON, self.OnToggle5,id = Toggle5ID)
         self.Bind(wx.EVT_BUTTON,self.OnToggleAll, id = ToggleAllID)
-        
+        self.Bind(wx.EVT_CHOICE,self.OnDistributor,id = DstrID)
+        self.UpdateThread = threading.Thread(target=self.RequestUpdate)
+        self.UpdateThread.daemon = True
+        self.UpdateThread.start()
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
 
+    def OnEraseBackground(self, event):
+        pass 
+    def OnDistributor(self,event):
+        print("ondistr")
+        ChoiceObj = event.GetEventObject()
+        idx =ChoiceObj.index
+        Dindex = event.GetSelection()
+        request.patch(tswapi+"/set/CurrentFormation/" + str(idx) +"/DistributerCutOff.InputValue?Value=" + str(Dindex), headers = header)
+        if Dindex:
+            Dindex = 0
+        else:
+            Dindex = 1
+        request.patch(tswapi+"/set/CurrentFormation/" + str(idx) +"/DistributerCutOut.InputValue?Value=" + str(Dindex), headers = header)
+        request.patch(tswapi+"/set/CurrentFormation/" + str(idx) +"/DistributorIsolatingValve.InputValue?Value=" + str(Dindex), headers = header)
+    def OnTopToggleF(self,event):
+            self.ToggleWindowStyle(wx.STAY_ON_TOP)
+    def UpdateText(self,text):
+        self.statustext.SetLabel(text)
     def OnToggle5(self,event):
         self.TogThread = threading.Thread(target = self.ToggleBrake, args = [0])
         self.TogThread.start()
@@ -1361,15 +1364,15 @@ class MainWindow(wx.Frame):
             if str(self.FormationList[1+self.LocoCount].Name) == "Sggmrss":
                 for i in range(0,7+self.LocoCount):
                     self.FormationList[i].SetBM(0)
-                    self.ChoiceControlWindow.BrakeChoiceList[i].SetSelection(0)
+                    self.VehControlWindow.BrakeChoiceList[i].SetSelection(0)
             else:
                 for i in range(0,6 + self.LocoCount):
                     self.FormationList[i].SetBM(0)
-                    self.ChoiceControlWindow.BrakeChoiceList[i].SetSelection(0)
+                    self.VehControlWindow.BrakeChoiceList[i].SetSelection(0)
         else:
             for i in range(1,self.FormationListUI.GetItemCount()):
                 self.FormationList[i].SetBM(0)
-                self.ChoiceControlWindow.BrakeChoiceList[i].SetSelection(0)
+                self.VehControlWindow.BrakeChoiceList[i].SetSelection(0)
     def OnSelection(self,event):
         #print("choice made")
         global PU
@@ -1379,11 +1382,12 @@ class MainWindow(wx.Frame):
         ChoiceObj = event.GetEventObject()
         idx =ChoiceObj.index
         Bindex = event.GetSelection()
-        print("A choice was made for vehicle " + str(idx) + "with index " +str(Bindex))
+        #print("A choice was made for vehicle " + str(idx) + "with index " +str(Bindex))
         self.BrakeThread = threading.Thread(target =self.FormationList[idx].SetBM, args = [Bindex])
         self.BrakeThread.start()
         #self.FormationList[idx].SetBM(Bindex)
     def OnRefresh(self, UpdateData):
+        start_time = time.perf_counter()
         if not self.Rebuilding:
             BP = 0
             BC = 0
@@ -1396,27 +1400,27 @@ class MainWindow(wx.Frame):
             LogFile.write("Item count is " + str(ItemCount) + "\n")
             if ItemCount:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/0/RailVehiclePhysicsComponent0.Function.GetFormationLength", headers = header)
-                while i < (self.FormationListUI.GetItemCount()*5) + self.DoubleBrakeSwitchCount:
+                while i < (self.FormationListUI.GetItemCount()*6) + self.DoubleBrakeSwitchCount:
                             # subscription should be 1.BP-BAR 2.BP-PSI 3.BC-BAR 4.BC-PSI 5.BrakeMode(G,P,P2(why?),R,R+Mg)
-                                LogFile.write("for i = " +str(i) )
-                                LogFile.write("\n")
-                                LogFile.write(str(UpdateData['Entries'][i]))
-                                LogFile.write("\n")
-                                LogFile.write(str(UpdateData['Entries'][i+1]))
-                                LogFile.write("\n")
-                                LogFile.write(str(UpdateData['Entries'][i+2]))
-                                LogFile.write("\n")
-                                LogFile.write(str(UpdateData['Entries'][i+3]))
-                                LogFile.write("\n")
-                                LogFile.write(str(UpdateData['Entries'][i+4]))
-                                LogFile.write("\n")
-                                name =  self.FormationListUI.GetTextValue(int(i/5),1)
+                                #print("for i = " +str(i) )
+                                #LogFile.write("\n")
+                                #LogFile.write(str(UpdateData['Entries'][i]))
+                                #LogFile.write("\n")
+                                #LogFile.write(str(UpdateData['Entries'][i+1]))
+                                #LogFile.write("\n")
+                                #LogFile.write(str(UpdateData['Entries'][i+2]))
+                                #LogFile.write("\n")
+                                #LogFile.write(str(UpdateData['Entries'][i+3]))
+                                #LogFile.write("\n")
+                                #LogFile.write(str(UpdateData['Entries'][i+4]))
+                                #LogFile.write("\n")
+                                name =  self.FormationListUI.GetTextValue(int(i/6),1)
                                 Had2BrakeSwitches = 0
-                                if self.FormationList[int(i/5)].BTT == 7:
+                                if self.FormationList[int(i/6)].BTT == 7:
                                     Had2BrakeSwitches = 1
-                                if self.FormationList[int(i/5)].BTT == 420:
+                                if self.FormationList[int(i/6)].BTT == 420:
                                     Had2BrakeSwitches = 1
-                                LogFile.write(f"Had2BrakeSwitches = {Had2BrakeSwitches} \n")
+                                #LogFile.write(f"Had2BrakeSwitches = {Had2BrakeSwitches}, vehname = {self.FormationList[int(i/6)].Name} \n")
                                 if not PU:
                                     if not str(UpdateData['Entries'][i]['Values']) == "None":
                                         BP = UpdateData['Entries'][i]['Values']['Pressure_BAR_G']
@@ -1431,62 +1435,88 @@ class MainWindow(wx.Frame):
                                 if  not str(UpdateData['Entries'][i+4]['Values']) == "None":
                                     BI = UpdateData['Entries'][i+4]['Values']['ReturnValue']
                                 if Had2BrakeSwitches:
-                                    LogFile.write("entered here \n")
-                                    LogFile.write(str(i))
-                                    LogFile.write(str(UpdateData['Entries'][i+5]))
+                                    #LogFile.write("entered here \n")
+                                    #LogFile.write(str(i))
+                                    #LogFile.write(str(UpdateData['Entries'][i+5]))
                                     BI2 = UpdateData['Entries'][i+5]['Values']['ReturnValue']
                                     i = i+1
                                 BP = round(BP,1)
                                 BC = round(BC,1)
                                 BPstr = "BP: " + str(BP)
                                 BCstr = "BC: " + str(BC)
+                                if not str(UpdateData['Entries'][i+5]['Values']) == "None":
+                                    DStatus = UpdateData['Entries'][i+5]['Values']['ReturnValue']
+                                    if self.FormationList[int(i/6)].DType:
+                                        if not DStatus == self.VehControlWindow.DstrChoice[int(i/6)].GetSelection():
+                                            self.VehControlWindow.DstrChoice[int(i/5)].SetSelection(DStatus)
+                                    else:
+                                        if DStatus:
+                                            DStatus = 0
+                                        else:
+                                            DStatus = 1
+                                    if not DStatus == self.VehControlWindow.DstrChoice[int(i/6)].GetSelection():
+                                                self.VehControlWindow.DstrChoice[int(i/6)].SetSelection(DStatus) 
+                                            
                                 # updating the table
-                                LogFile.write(f"bi = {BI}")
+                                #LogFile.write(f"bi = {BI}")
                                 if not BI == -1:
-                                    Bistr = self.FormationList[int(i/5)].GetBM(BI,BI2)
+                                    Bistr = self.FormationList[int(i/6)].GetBM(BI,BI2)
                                     LogFile.write(f"i = {i} Bistr  = {Bistr}")
                                     if not Bistr == "None":
-                                        res = self.FormationListUI.SetTextValue(Bistr,int(i/5),2)
-                                        if BI != self.ChoiceControlWindow.BrakeChoiceList[int(i/5)].GetSelection():
-                                            self.ChoiceControlWindow.BrakeChoiceList[int(i/5)].SetSelection(BI)
+                                        
+                                        res = self.FormationListUI.SetTextValue(Bistr,int(i/6),2)
+                                        if not self.FormationList[int(i/6)].BTT == 2:
+                                            if BI != self.VehControlWindow.BrakeChoiceList[int(i/6)].GetSelection():
+                                                self.VehControlWindow.BrakeChoiceList[int(i/6)].SetSelection(BI)
+                                        else:
+                                            if BI:
+                                                BI = 0
+                                            else:
+                                                BI = 1
+                                            if BI != self.VehControlWindow.BrakeChoiceList[int(i/6)].GetSelection():
+                                                self.VehControlWindow.BrakeChoiceList[int(i/6)].SetSelection(BI)
                                     else:
-                                        self.FormationListUI.SetTextValue("?",int(i/5),2)
+                                        self.FormationListUI.SetTextValue("?",int(i/6),2)
                                     
                                 else:
-                                    self.FormationListUI.SetTextValue("[G]?",int(i/5),2)
-                                self.FormationListUI.SetTextValue(BPstr,int(i/5),3)
-                                self.FormationListUI.SetTextValue(BCstr,int(i/5),4)
-                                i = i + 5
-                                LogFile.write("end of loop")
+                                    self.FormationListUI.SetTextValue("[G]?",int(i/6),2)
+                                self.FormationListUI.SetTextValue(BPstr,int(i/6),3)
+                                self.FormationListUI.SetTextValue(BCstr,int(i/6),4)
+                                i = i + 6
+                                #LogFile.write("end of loop")
+                                #print("end")
+        end_time = time.perf_counter()
+        timetaken = end_time-start_time
+        print(f"Update function took {timetaken*1000}ms")
     def ClearList(self):
         print("Clearing...")
         self.VehCount = 0
-        self.SetStatusText("No Formation Detected,Clearing UI")
+        self.statustext.SetLabel("No Formation Detected,Clearing UI")
         self.Freeze()
         if self.FormationListUI.GetItemCount():
             self.FormationListUI.DeleteAllItems()
         
-        self.WindowSizer.Detach(self.ChoiceControlWindow)
-        self.ChoiceControlWindow.DestroyChildren()
+        self.WindowSizer.Detach(self.VehControlWindow)
+        self.VehControlWindow.DestroyChildren()
         self.WindowSizer.Layout()
         self.Thaw()
-        self.SetStatusText("Waiting for Formation")
+        self.statustext.SetLabel("Waiting for Formation")
     def UpdateOptions(self):
         pass
     def RebuildFormation(self):
         self.Rebuilding = 1
-        MainWindow.ClearList()
+        self.ClearList()
         LogFile.write("Rebuilding Formation \n")
         LogFile.flush() # Add this line
         requests.delete(tswapi + "/subscription/?Subscription=42", headers = header)
-        self.WindowSizer.Detach(self.ChoiceControlWindow)
-        self.ChoiceControlWindow.ClearLists()
-        self.ChoiceControlWindow.Destroy()
+        self.WindowSizer.Detach(self.VehControlWindow)
+        self.VehControlWindow.ClearLists()
+        self.VehControlWindow.Destroy()
         print("window destroyed")
-        self.SetStatusText("Rebuilding Formation")
+        self.statustext.SetLabel("Rebuilding Formation")
         self.Freeze()
 
-        self.ChoiceControlWindow = ChoiceWindow(self,(510,25),(100,375))
+        self.VehControlWindow = ChoiceWindow(self)
 
         self.FormationLength = 0
         self.text = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header)
@@ -1503,6 +1533,7 @@ class MainWindow(wx.Frame):
                     fname = vname.split("_")
                     VehName = GetVehicleName(vname)
                     LogFile.write("Detected " + vname + " at position " + str(i) + "with reference name " + VehName + "\n")
+                    print("Detected " + vname + " at position " + str(i) + "with reference name " + VehName + "\n")
                     if VehName == "Laaers":
                         self.SkipNext = 1
                         if fname[3] == "B":
@@ -1549,26 +1580,95 @@ class MainWindow(wx.Frame):
             for i in range(CC):
                 PBM = self.FormationList[i].GetPBM()
                 BMI = self.FormationList[i].GetBMInt()
-                
                 #print(f"for i = {i} PBM = {PBM} BMI = {BMI} BTT = {self.FormationList[i].BTT}")
-                self.ChoiceControlWindow.CreateBrakeControl(i,PBM,BMI)
+                self.VehControlWindow.CreateVehicleControl(i,PBM,BMI)
         else:
                 self.Toggle5Button.Hide()
                 self.ToggleAllButton.Hide()
                 self.FormationListUI.GetColumn(2).SetHidden(1)
-        self.ChoiceControlWindow.RebuildLayout()
-        self.WindowSizer.Add(self.ChoiceControlWindow)
+        self.VehControlWindow.RebuildLayout()
+        self.WindowSizer.Add(self.VehControlWindow,1,wx.EXPAND)
         self.WindowSizer.Layout()
-        self.ChoiceControlWindow.Show()
+        self.VehControlWindow.Show()
         self.Thaw()
         self.VehCount = self.fl
         self.Rebuilding = 0
-        self.SetStatusText("Displaying Formation")
+        self.statustext.SetLabel("Displaying Formation")
+    def RequestUpdate(self):
+     UpdateData = 0
+     Vh = 0
+     SkipToRebuild = 0
 
-            
+     while 1:
+            res = IsTSWOpen()
+            if res:
+                SkipToRebuild = 0
+                if not self.Rebuilding:
+                    try:
+                        isForm = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header).json()
+                        vname = request.get(tswapi + "/get/CurrentFormation/0.ObjectName ", headers = header).json()
+                        if not vname['Result'] == "Error":
+                            vname = vname['Values']['ObjectName']
+                            fname = vname.split("_")
+                            VehName = GetVehicleName(vname)
+                            vname = request.get(tswapi + "/get/CurrentFormation/1.ObjectName ", headers = header).json()
+                            vname = vname['Values']['ObjectName']
+                            fname = vname.split("_")
+                            VehName2 = GetVehicleName(vname)
+                            if self.VehCount:
+                                if not VehName == self.FormationList[0].Name:
+                                    SkipToRebuild = 1
+                                if not VehName2 == self.FormationList[1].Name:
+                                    SkipToRebuild = 1
+                    except requests.exceptions.ConnectionError as e:
+                        continue
+                    if not isForm['Result'] == "Error":
+                        Vh = isForm['Values']['FormationLength']
+
+                        if Vh == self.VehCount :
+                            if not SkipToRebuild:
+                                try:
+                                    UpdateData = request.get(tswapi + "/subscription?Subscription=42", headers = header).json()
+                                except requests.exceptions.ConnectionError as e:
+                                    time.sleep(1)
+                            else:
+                                print("Formation Changed")
+                                Vh = 0
+                                LogFile.write("Formation Changed, Rebuilding... \n")
+                                LogFile.flush() 
+                                wx.CallAfter(self.RebuildFormation)
+                                time.sleep(1)
+                        else:
+                            print("Formation Changed")
+                            Vh = 0
+                            LogFile.write("Formation Changed, Rebuilding... \n")
+                            LogFile.flush() 
+                            wx.CallAfter(self.RebuildFormation)
+                            time.sleep(1)
+                    else:
+                        try :
+                            requests.delete(tswapi + "/subscription/?Subscription=42", headers = header).json()
+                        except requests.exceptions.ConnectionError as e:
+                            print("error deleting subs")
+                        VehCount = 0
+                        MainWindow.statustext.SetLabel("No formation found")
+                        if MainWindow.VehCount:
+                            wx.CallAfter(self.ClearList)
+                        time.sleep(1)
+                    if Vh:
+                        if UpdateData:
+                 
+                            wx.CallAfter(self.OnRefresh,UpdateData)
+            else:
+                print("tsw not open")
+                self.UpdateText("Waiting for TSW")
+                if self.FormationListUI.GetItemCount():
+                    self.FormationListUI.DeleteAllItems()
+            time.sleep(0.5)
+
+    
 
 
-
-app = wx.App(False,"ProgramOutput.log",)
-MainWindow = MainWindow(None, "Formation Viewer 0.5.7")
+app = wx.App(True,"ProgramOutput.log",)
+MainWindow = MainWindowClass(None, "Formation Viewer 0.5.10")
 app.MainLoop()
