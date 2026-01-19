@@ -11,7 +11,8 @@ import psutil
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from pathlib import Path
-
+import ctypes
+import wx.lib.buttons as buttons
 #subscription id = 42
 #add reverse display
 
@@ -52,6 +53,10 @@ LogFile = open("log.txt", "a")
 LogFile.write(str(now))
 LogFile.write("\n")
 LogFile.flush() 
+ 
+TextColour = [137, 206, 148] #255,253,208 #209,248,239 #246, 48, 73
+BackgroundColour = [51, 51, 51] #0,0,0 #54,116,181 #17, 31, 53
+
 
 def IsTSWOpen():
     for p in psutil.process_iter():
@@ -1140,17 +1145,17 @@ class ChoiceWindow(wx.ScrolledWindow):
         self.lay = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.lay)
         self.lay.SetSizeHints(self)
-        self.SetBackgroundColour(colour= [0,0,0])
+        self.SetBackgroundColour(BackgroundColour)
         self.lay.Layout()
         self.FitInside()
         self.SetScrollRate(0, 20)
     def CreateVehicleControl(self,i,ValidChoices,CBrake):
                 statictext = wx.StaticText(self,wx.ID_ANY,str(i),style = wx.ALIGN_CENTER)
-                statictext.SetForegroundColour(colour = [255,253,208])
+                statictext.SetForegroundColour(TextColour)
                 brakechoice = VehicleChoiceControl()
                 brakechoice.Create(self,i,BrakeChoiceID,ValidChoices,CBrake)
-                brakechoice.SetBackgroundColour(colour = [0,0,0])
-                brakechoice.SetForegroundColour(colour = [255,253,208])
+                brakechoice.SetBackgroundColour(BackgroundColour)
+                brakechoice.SetForegroundColour(TextColour)
                 DChoice = VehicleChoiceControl()
                 DChoice.Create(self,i,DstrID,["Close","Open"],1)
                 DChoice.SetSelection(1)
@@ -1184,14 +1189,13 @@ class MainWindowClass(wx.Frame):
     LocoCount = 0
     DoubleBrakeSwitchCount = 0
     def __init__(self, parent, title):
-        
         LogFile.write("Initializing Frame \n")
         LogFile.flush() 
         wx.Frame.__init__(self,parent,title = title, size = (620,500))
         self.PBar = wx.StatusBar(self)
         self.statustext = wx.StaticText(self.PBar,label = "Test Text",pos = (5,5))
-        self.statustext.SetForegroundColour(colour = [255,253,208])
-        self.PBar.SetBackgroundColour(colour= [0,0,0])
+        self.statustext.SetForegroundColour(TextColour)
+        self.PBar.SetBackgroundColour(BackgroundColour)
         self.ListSizer = wx.BoxSizer(wx.VERTICAL)
         self.WindowSizer = wx.BoxSizer(wx.HORIZONTAL)
         LogFile.write("Frame + sizers Initialized \n")
@@ -1204,26 +1208,26 @@ class MainWindowClass(wx.Frame):
         self.FormationListUI.AppendTextColumn("BC")
         self.FormationListUI.AppendTextColumn("Weight", width = 70)
         self.FormationListUI.AppendTextColumn("Load", width = 70)
-        self.FormationListUI.SetBackgroundColour(colour= [0,0,0])
-        self.FormationListUI.SetForegroundColour(colour = [255,253,208])
+        self.FormationListUI.SetBackgroundColour(BackgroundColour)
+        self.FormationListUI.SetForegroundColour(TextColour)
         self.OnTopToggle = wx.CheckBox(self,OnTopToggleID,label = "Stay on Top")
-        self.OnTopToggle.SetForegroundColour(colour = [255,253,208])
+        self.OnTopToggle.SetForegroundColour(TextColour)
         self.PressureUnitChoice = wx.Choice(self,PressureChoiceID,choices = ["BAR", "PSI"],name= "Pressure Unit Choice")
         self.VehControlWindow = ChoiceWindow(self)
-        self.Toggle5Button = wx.Button(self,Toggle5ID,"Toggle First 5")
+        self.Toggle5Button = buttons.GenButton(self,Toggle5ID,"Toggle First 5")
         self.Toggle5Button.SetBackgroundColour(colour = [0,0,0])
-        self.Toggle5Button.SetForegroundColour(colour = [255,253,208])
-        self.ToggleAllButton = wx.Button(self,ToggleAllID,"Toggle All Wagons")
+        self.Toggle5Button.SetForegroundColour(TextColour)
+        self.ToggleAllButton = buttons.GenButton(self,ToggleAllID,"Toggle All Wagons")
         self.ToggleAllButton.SetBackgroundColour(colour = [0,0,0])
-        self.ToggleAllButton.SetForegroundColour(colour = [255,253,208])
+        self.ToggleAllButton.SetForegroundColour(TextColour)
         self.PressureUnitChoice.SetSelection(0)
         self.ListSizer.Add(self.FormationListUI,1,wx.EXPAND)
         self.ListSizer.Add(self.OnTopToggle,0)
         self.ListSizer.Add(self.PressureUnitChoice,0)
         self.ListSizer.Add(self.Toggle5Button,0)
         self.ListSizer.Add(self.ToggleAllButton,0)
-        self.SetBackgroundColour(colour= [0,0,0])
-        self.SetForegroundColour(colour = [255,253,208])
+        self.SetBackgroundColour(BackgroundColour)
+        self.SetForegroundColour(TextColour)
         #self.OptionsBar = wx.MenuBar();
         #self.OptionsMenu = wx.Menu("Options")
         #self.OptionsBar.Append(self.OptionsMenu,"Options")
@@ -1315,10 +1319,36 @@ class MainWindowClass(wx.Frame):
         self.SetSizer(self.WindowSizer)
         self.WindowSizer.Layout()
         self.LocoCount = self.LocoCount -1
+        self.VehControlWindow.Refresh()
         self.VehControlWindow.Show()
         self.Show(True)
         self.Center()
-
+        hwnd = self.GetHandle()
+        try:
+                ctypes.windll.dwmapi.DwmSetWindowAttribute(
+                    hwnd, 20, ctypes.byref(ctypes.c_int(1)), 4
+                )
+        except Exception:
+                pass
+        try:
+                ctypes.windll.uxtheme.SetWindowTheme(hwnd, "DarkMode_Explorer", None)
+        except Exception:
+                pass
+                
+        for child in self.GetChildren():
+            hwnd = child.GetHandle()
+            try:
+                    ctypes.windll.dwmapi.DwmSetWindowAttribute(
+                        hwnd, 20, ctypes.byref(ctypes.c_int(1)), 4
+                    )
+            except Exception:
+                    pass
+                    
+            try:
+                    ctypes.windll.uxtheme.SetWindowTheme(hwnd, "DarkMode_Explorer", None)
+            except Exception:
+                    pass
+        self.Refresh()
         LogFile.write("Opening Update Thread \n")
         LogFile.flush() 
         self.statustext.SetLabel("Displaying Formation")
@@ -1353,9 +1383,11 @@ class MainWindowClass(wx.Frame):
     def UpdateText(self,text):
         self.statustext.SetLabel(text)
     def OnToggle5(self,event):
+        print("here1")
         self.TogThread = threading.Thread(target = self.ToggleBrake, args = [0])
         self.TogThread.start()
     def OnToggleAll(self,event):
+        print("here2")
         self.TogThread = threading.Thread(target = self.ToggleBrake, args = [1])
         self.TogThread.start()
     def ToggleBrake(self,mode = 0):
@@ -1660,7 +1692,6 @@ class MainWindowClass(wx.Frame):
                  
                             wx.CallAfter(self.OnRefresh,UpdateData)
             else:
-                print("tsw not open")
                 self.UpdateText("Waiting for TSW")
                 if self.FormationListUI.GetItemCount():
                     self.FormationListUI.DeleteAllItems()
@@ -1669,6 +1700,6 @@ class MainWindowClass(wx.Frame):
     
 
 
-app = wx.App(True,"ProgramOutput.log",)
+app = wx.App(False,"ProgramOutput.log",)
 MainWindow = MainWindowClass(None, "Formation Viewer 0.5.10")
 app.MainLoop()
