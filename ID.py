@@ -1,0 +1,10 @@
+ListCtrlID = 2
+OnTopToggleID = 3
+OnTrTogID = 4
+PressureChoiceID = 5
+Toggle5ID = 7
+ToggleAllID = 8
+ThemeChoiceID = 9
+ThemeWindowID = 10
+ToggleColumnButtonID = 11
+ToggleColumnID = 100

@@ -10,14 +10,16 @@ VehicleData = {
         "BTT": 6,
         "BPT": 2, # BP = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/Simulation/BP (AirPipe).Pressure_BAR_G", headers = header).json())
         "BCT": 2, #BC = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/Simulation/BrakeCylinder_1.Pressure_BAR_G", headers = header).json() 
-        "isWagon": False
+        "isWagon": False,
+        "DiType" : 0,
         },
     "OBB1020" : { 
         "Weight": 120,
         "BTT" : 7,
         "BPT" : 1, # BP = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/Simulation/AirPipe (BP).Pressure_BAR_G", headers = header).json()
         "BCT" : 5, #     BC = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/Simulation/Brake Cylinder Volume A.Pressure_BAR_G", headers = header).json() 
-        "isWagon": False
+        "isWagon": False,
+        "DiType" : 0,
     },
     "BR103" : {
         "Weight": 114,
@@ -25,6 +27,7 @@ VehicleData = {
         "BPT": 3, # BP = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/Simulation/HL.Pressure_BAR_G", headers = header).json() 
         "BCT": 3, # BC = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/Simulation/BrakeCylinder2.Pressure_BAR_G", headers = header).json() 
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR110" : {
         "Weight": 85,
@@ -32,6 +35,7 @@ VehicleData = {
         "BPT": 3,
         "BCT": 3,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR111" : {
         "Weight": 85,
@@ -39,6 +43,7 @@ VehicleData = {
         "BPT": 3,
         "BCT": 3,
         "isWagon": False,
+        "DiType" : 0,
     },
     "OBB1116": {
         "Weight": 88,
@@ -46,6 +51,7 @@ VehicleData = {
         "BPT": 2,  
         "BCT": 1, # BC = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/Simulation/BrakeCylinder.Pressure_BAR_G", headers = header).json() 
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR112" : {
         "Weight": 82.5,
@@ -53,6 +59,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR114" : {
         "Weight": 82.5,
@@ -60,6 +67,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR140" : {
         "Weight" : 83,
@@ -67,6 +75,7 @@ VehicleData = {
         "BPT" : 3,
         "BCT" : 3,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR143" : {
         "Weight": 82.5,
@@ -74,6 +83,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "DB146": {
         "Weight": 85,
@@ -81,6 +91,7 @@ VehicleData = {
         "BPT": 2,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR146-2": {
         "Weight": 85,
@@ -88,6 +99,7 @@ VehicleData = {
         "BPT": 2,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR155" : {
         "Weight": 123,
@@ -95,6 +107,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR182" : {
         "Weight": 86,
@@ -102,6 +115,7 @@ VehicleData = {
         "BPT": 2,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR185" : {
         "Weight": 85,
@@ -109,6 +123,7 @@ VehicleData = {
         "BPT": 2,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR185-2" : {
         "Weight": 85,
@@ -116,6 +131,7 @@ VehicleData = {
         "BPT": 2,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR185-5" : {
         "Weight": 85,
@@ -123,6 +139,7 @@ VehicleData = {
         "BPT": 2,
         "BCT": 2,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR187" : {
         "Weight": 85,
@@ -130,6 +147,7 @@ VehicleData = {
         "BPT": 2,
         "BCT": 2,
         "isWagon": False,
+        "DiType" : 0,
 
     },
     "Vectron" : {
@@ -138,6 +156,7 @@ VehicleData = {
         "BPT": 2,
         "BCT": 4, # BC = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/Simulation/BrakeCylinder_1_2.Pressure_BAR_G", headers = header).json() 
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR194" : {
         "Weight": 120,
@@ -145,6 +164,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 5,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR204" : {
         "Weight": 70,
@@ -152,6 +172,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 2,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR218" : {
         "Weight": 80,
@@ -159,6 +180,7 @@ VehicleData = {
         "BPT": 3,
         "BCT": 3,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR294" : {
         "Weight": 85,
@@ -166,6 +188,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR363" : {
         "Weight": 55,
@@ -173,6 +196,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 2,
         "isWagon": False,
+        "DiType" : 0,
     },
     "BR365" : {
         "Weight": 55,
@@ -180,6 +204,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 2,
         "isWagon": False,
+        "DiType" : 0,
     },
     "E94" : {
         "Weight": 120,
@@ -187,6 +212,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 5,
         "isWagon": False,
+        "DiType" : 0,
     },
     "G6" : {
         "Weight": 65,
@@ -194,6 +220,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 6, # /get/CurrentFormation/0/Simulation/Bremszylinder1.Pressure_BAR_G
         "isWagon": False,
+        "DiType" : 0,
     },
     "Eanos" : {
         "Weight": 26,
@@ -201,6 +228,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 0,
     },
     "Es050" : {
         "Weight": 11,
@@ -208,6 +236,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 7, #BC = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/Simulation/BrakeCylinder_2.Pressure_BAR_G", headers = header).json() 
         "isWagon": True,
+        "DiType" : 3,
     },
     "Falns183" : {
         "Weight": 24,
@@ -215,6 +244,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 7,
         "isWagon": True,
+        "DiType" : 3,
     },
     "Gbs254" : {
         "Weight": 13,
@@ -222,6 +252,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 7,
         "isWagon": True,
+        "DiType" : 3,
     },
     "Habbins" : {
         "Weight": 27,
@@ -229,6 +260,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Habbiins" : {
         "Weight": 27,
@@ -236,6 +268,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Habbiins344" : {
         "Weight": 27,
@@ -243,6 +276,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 0,
     },
     "Kijls" : {
         "Weight": 17,
@@ -250,6 +284,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 2,
     },
     "Rmms663" : {
         "Weight": 21,
@@ -257,6 +292,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 7,
         "isWagon": True,
+        "DiType" : 3,
     },
     "Roos-t645" : {
         "Weight": 25,
@@ -264,6 +300,8 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 0,
+
     },
     "Roos-t" : {
         "Weight": 25,
@@ -271,6 +309,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Shimmns-u" : {
         "Weight": 22,
@@ -278,6 +317,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Shimmns" : {
         "Weight": 22,
@@ -285,6 +325,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Shimmns-U708" : {
         "Weight": 22,
@@ -292,6 +333,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Shimmns-TTU722" : {
         "Weight": 24,
@@ -299,6 +341,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Tadgs" : {
         "Weight": 24,
@@ -306,6 +349,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Tadgs959" : {
         "Weight": 24,
@@ -313,6 +357,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Uacns82" : {
         "Weight": 18,
@@ -320,6 +365,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 0,
     },
     "Zacns" : {
         "Weight": 23,
@@ -327,20 +373,23 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Laaers" : {
         "Weight": 30,
         "BTT" : 1,
         "BPT": 1,
         "BCT": 1,
-        "isWagon" : True
+        "isWagon" : True,
+        "DiType" : 1,
     },
     "Sggmrss" : {
         "Weight" : 30,
         "BTT" : 1,
         "BPT" : 1,
         "BCT" : 1,
-        "isWagon" : True 
+        "isWagon" : True ,
+        "DiType" : 1,
 
     },
     "ABnb-703": {
@@ -349,6 +398,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Avmz" : {
         "Weight": 50,
@@ -356,6 +406,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 2,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Bmmz" : {
         "Weight": 50,
@@ -363,6 +414,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Bmmdz" : {
         "Weight": 45,
@@ -370,6 +422,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Bmmbz" : {
         "Weight": 50,
@@ -377,6 +430,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Bmz" : {
         "Weight": 55,
@@ -384,13 +438,15 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Bnb-719" : {
         "Weight" : 35,
         "BTT" : 14,
         "BPT":  1,
         "BCT" : 1,
-        "isWagon": True
+        "isWagon": True,
+        "DiType" : 1,
     },
     "Bnr" : {
         "Weight": 40,
@@ -398,6 +454,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Bnrdfz" : {
         "Weight": 40,
@@ -405,6 +462,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Bnrdzf" : {
         "Weight": 40,
@@ -412,6 +470,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Bpmmbdzf" : {
         "Weight": 55,
@@ -419,6 +478,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Bpmz" : {
         "Weight": 50,
@@ -426,6 +486,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 2,
         "isWagon": True,
+        "DiType" : 1,
     },
     "Byg516" : {
         "Weight": 35,
@@ -433,6 +494,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "766pbzfa" : {
         "Weight": 60,
@@ -440,6 +502,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "785pza" : {
         "Weight": 60,
@@ -447,6 +510,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
     "780pza" : {
         "Weight": 60,
@@ -454,6 +518,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
+        "DiType" : 1,
     },
 
     }
