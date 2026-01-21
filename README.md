@@ -35,4 +35,5 @@ TSW Formation Viewer is a standalone application that aims to provide a real-tim
 # NOTE: The program has full support for German Rolling stock(besides MU's), the program should load any formation but full support isnt guaranteed because DTG loves making up new names for brake cylinders/brake mode switches
 I do not have many UK/US routes so i cant do more unless someone offers to help me with testing
 
-## Special thanks to OpenMinded for helping me with testing the program
+## Credits
+Special thanks to OpenMinded for helping me with testing the program
