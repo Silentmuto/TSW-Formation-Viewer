@@ -53,6 +53,8 @@ def IsTSWOpen():
     for p in psutil.process_iter():
        if p.name()  == 'TrainSimWorld.exe':
             return 1
+       if p.name()  == 'TrainSimWorld6.exe':
+            return 1
     return 0
 
 
@@ -60,6 +62,12 @@ def GetVehicleName(ObjectName):
     vname = ObjectName
     fname = vname
     vname = vname.split('_')
+    aux = vname
+    for i in range(len(vname)):
+        if not vname[i].find("Class") == -1:
+            return vname[i]
+        if not vname[i].find("Car") == -1:
+            return vname[i-1] +" " +  vname[i]
     if str(vname[1]) == "RVM":
         tstring = vname[0]
     else:
@@ -126,9 +134,6 @@ class Vehicle:
             
 
     def PrintData(self):
-         if not self.isWagon:
-            return [self.Name, "BTT = " + str(self.BTT), "BPT = " + str(self.BPT),"BCT = " + str(self.BCT)]
-         else:
             return [self.Name, "BTT = " + str(self.BTT), "BPT = " + str(self.BPT),"BCT = " + str(self.BCT)]
     
     def ReturnSequence(self):
@@ -153,11 +158,10 @@ class Vehicle:
                 self.BP = float(ReqData['Values'][RVData.PressureUnit[PU] ])
                 self.BP = round(self.BP,1)
             else:
-                LogFile.write(f"Error finding BP values for  vehicle {self.Name} ")
+                LogFile.write(f"Error finding BP values for  vehicle {self.Name} \n")
                 LogFile.flush() 
                 HasError = 1
             
-            LogFile.write(f"\n HasError after BP = {HasError} \n")
             if self.BCT == 1:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[PU]+ "", headers = header).json()    
             if self.BCT == 2:
@@ -176,10 +180,9 @@ class Vehicle:
                 self.BC = float(ReqData['Values'][RVData.PressureUnit[PU]])
                 self.BC = round(self.BC,1)
             else:
-                LogFile.write(f"Error finding BC values for  vehicle {self.Name} ")
+                LogFile.write(f"Error finding BC values for  vehicle {self.Name} \n")
                 LogFile.flush() 
                 HasError = 1
-            LogFile.write(f"\n HasError after BC = {HasError} \n")
 
             if self.BTT == 1:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.Function.GetCurrentNotchIndex", headers = header).json()
@@ -356,6 +359,8 @@ class Vehicle:
                  else:
                      BR = 0
                      self.BrakeType = "[P]"
+            if self.DType == 0:
+                HasError = 1
             if self.DType == 1:
                 TestData = request.get(tswapi + "/list/CurrentFormation/" + str(self.index)+ "/DistributerCutOff/",headers = header).json()
                 if TestData['Result'] == "Error":
@@ -366,6 +371,10 @@ class Vehicle:
                     HasError = 1
             if self.DType == 3:
                 TestData = request.get(tswapi + "/list/CurrentFormation/" + str(self.index)+ "/DistributorIsolatingValve/",headers = header).json()
+                if  TestData['Result'] == "Error":
+                    HasError = 1
+            if self.DType == 5:
+                TestData = request.get(tswapi + "/list/CurrentFormation/" + str(self.index) + "/AirBrakeSelector_L",headers = header).json()
                 if  TestData['Result'] == "Error":
                     HasError = 1
             if BR == -1:
@@ -387,8 +396,7 @@ class Vehicle:
                             self.BrakeType = "[P2]"
                         elif BR == 3:
                             self.BrakeType = "[R]"
-            LogFile.write(str(self.BTT) + "for vehicle")
-            LogFile.write(f"\n HasError after BT = {HasError} \n")
+
             return HasError
     def SetSubs(self):
         #Setting subs for BP  pressure
@@ -408,9 +416,8 @@ class Vehicle:
         #subs for BC pressure
 
         if self.BCT == 0:
-                print("subs for no bct")
-                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND1?Subscription=42", headers = header)
-                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND@?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND1?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND@?Subscription=42", headers = header)
         if self.BCT == 1:
             request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
             request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
@@ -484,7 +491,10 @@ class Vehicle:
             request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributorIsolatingValve.Function.GetCurrentNotchIndex?Subscription=42",headers = header)
         if self.DType == 0:
             request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NODistributor?Subscription=42",headers = header)
-        
+        if self.DType == 4:
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributorCutOff.Function.GetCurrentNotchIndex?Subscription=42",headers = header)
+        if self.DType == 5:
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/Distributor%20CutOff.ValvePosition?Subscription=42",headers = header)
     def GetBrakeEditor(self):
         if self.BTT == 0:
             return 4
@@ -895,7 +905,37 @@ class Vehicle:
             return 2
         return 0
     def GetDstr(self,Didx):
+        if self.Name == "780pza":
+            if Didx:
+                return "Closed"
+            else:
+                return "Open"
+        if self.Name == "785pza":
+            if Didx:
+                return "Closed"
+            else:
+                return "Open"
+        if self.Name == "766pbzfa":
+            if Didx:
+                return "Closed"
+            else:
+                return "Open"
+        if self.Name == "780pza":
+            if Didx:
+                return "Closed"
+            else:
+                return "Open"
+        if self.Name == "FCA":
+            if Didx:
+                return "Closed"
+            else:
+                return "Open"
         if self.DType == 1:
+            if Didx:
+                return "Open"
+            else:
+                return "Closed"
+        if self.DType == 4:
             if Didx:
                 return "Open"
             else:
@@ -905,6 +945,7 @@ class Vehicle:
                 return "Closed"
             else:
                 return  "Open"
+            
     def SetBM(self,Brake):
         BIndex = self.GetBMInt2(Brake)
         print(f"Bindex = {BIndex}")
@@ -917,6 +958,11 @@ class Vehicle:
         if self.BTT == 0:
             return 0
         if self.BTT == 1:
+            if self.Name == "Laaers":
+                if BIndex:
+                    BIndex = 0
+                else:
+                    BIndex = 1
             try:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.InputValue?Value=" + str(BIndex),headers = header)
             except requests.exceptions.ConnectionError as e:
@@ -1121,7 +1167,37 @@ class Vehicle:
         Value = int(Value)
         print(Value)
         if self.DType:
-            if not self.DType == 1:
+            if self.Name == "FCA":
+                if Value:
+                    Value = 0
+                else:
+                    Value = 1
+            if self.DType == 2:
+                if Value:
+                    Value = 0
+                else:
+                    Value = 1
+            elif self.DType == 3:
+                if Value:
+                    Value = 0
+                else:
+                    Value = 1
+            elif self.DType == 5:
+                if Value:
+                    Value = 0
+                else:
+                    Value = 1
+            elif self.Name == "780pza":
+                if Value:
+                    Value = 0
+                else:
+                    Value = 1
+            elif self.Name == "785pza":
+                if Value:
+                    Value = 0
+                else:
+                    Value = 1
+            elif self.Name == "766pbzfa":
                 if Value:
                     Value = 0
                 else:
@@ -1133,6 +1209,11 @@ class Vehicle:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/DistributerCutOut.InputValue?Value="+str(Value), headers = header)
             if self.DType == 3:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/DistributorIsolatingValve.InputValue?Value="+str(Value), headers = header)
+            if self.DType == 4:
+                request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/DistributorCutOff.InputValue?Value="+str(Value), headers = header)
+            if self.DType == 5:
+                request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AirBrakeSelector_L.InputValue?Value="+str(Value), headers = header)
+                request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AirBrakeSelector_R.InputValue?Value="+str(Value), headers = header)
 def FindData(index):
     BTT = 0
     BPT = 0
@@ -1274,8 +1355,12 @@ def FindData(index):
             if not TestData['Result'] == "Error":
                     DType = 3
             else:
-                LogFile.write("Distributor Valve not found for Vehicle")
-                LogFile.flush()
+                TestData = request.get(tswapi + "/list/CurrentFormation/" + str(index) + "/DistributorCutOff/", headers = header).json()
+                if not TestData['Result'] == "Error":
+                    DType = 4
+                else:
+                    LogFile.write("Distributor Valve not found for Vehicle \n")
+                    LogFile.flush()
     return [BTT,BPT,BCT,isWagon,Weight,DType]
 class ThemeWindow(wx.Dialog):
     def __init__(self,parent):
@@ -1422,7 +1507,7 @@ class MainWindowClass(wx.Frame):
     BackgroundColourC = []
     TextColourC = []
     GridLineColourC = []
-
+    AVH = 0
     def __init__(self, parent, title):
         LogFile.write("Initializing Frame \n")
         LogFile.flush() 
@@ -1439,8 +1524,7 @@ class MainWindowClass(wx.Frame):
             self.TextColourC = [137,206,148]
             self.GridLineColourC = [82,82,82]
 
-        
-        self.MainPanel = wx.Panel(self,-1,(0,0),(800,500))
+        self.MainPanel = wx.Panel(self,-1,(0,0))
         self.MainPanel.SetBackgroundColour(self.BackgroundColourC)
         self.PBar = wx.StatusBar(self)
         self.statustext = wx.StaticText(self.PBar,label = "Test Text",pos = (5,5))
@@ -1460,14 +1544,14 @@ class MainWindowClass(wx.Frame):
         
         self.PressureUnitChoice.SetSelection(0)
         self.ButtonSizer = wx.BoxSizer()
-        self.MainSizer.Add(self.FormationDisplay,0,wx.EXPAND)
-        self.ButtonSizer.Add(self.OnTopToggle,0,wx.LEFT,10)
-        self.ButtonSizer.Add(self.PressureUnitChoice,0,wx.LEFT,10)
-        self.ButtonSizer.Add(self.Toggle5Button,0,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ToggleAllButton,0,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ThemeChoice,0,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ToggleColumnButton,0,wx.LEFT,10)
-        self.MainSizer.Add(self.ButtonSizer,0,wx.TOP | wx.EXPAND,5)
+        self.MainSizer.Add(self.FormationDisplay,1)
+        self.ButtonSizer.Add(self.OnTopToggle,1,wx.LEFT,10)
+        self.ButtonSizer.Add(self.PressureUnitChoice,1,wx.LEFT,10)
+        self.ButtonSizer.Add(self.Toggle5Button,1,wx.LEFT,10)
+        self.ButtonSizer.Add(self.ToggleAllButton,1,wx.LEFT,10)
+        self.ButtonSizer.Add(self.ThemeChoice,1,wx.LEFT,10)
+        self.ButtonSizer.Add(self.ToggleColumnButton,1,wx.LEFT,10)
+        self.MainSizer.Add(self.ButtonSizer,0,wx.TOP,5)
 
 
 
@@ -1476,86 +1560,11 @@ class MainWindowClass(wx.Frame):
         #self.OptionsBar.Append(self.OptionsMenu,"Options")
         #self.SetMenuBar(self.OptionsBar)        
         self.SetStatusBar(self.PBar)
-        if IsTSWOpen():
-            LogFile.write(str(requests.delete(tswapi + "/subscription/?Subscription=42", headers = header).json()))
-            ReqData = request.get(tswapi + "/list/CurrentFormation", headers = header).json()
-            if ReqData['Result'] == "Error":
-                self.statustext.SetLabel("Waiting for formation")
-                LogFile.write("Waiting for formation...")
-                LogFile.flush() # Add this line
-            else:
-
-                self.text = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header)
-                self.text = self.text.json()
-                self.fl = int(self.text['Values']['FormationLength'])
-                self.VehCount = self.fl
-                LogFile.write("Detected " + str(self.VehCount) + " vehicles \n")
-                LogFile.flush() 
-                self.FormationLength = 0.0
-                self.FormationList = []
-                for i in range(self.fl):
-                        self.SkipCurrent = 0
-                        vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).json()
-                        vname = vname['Values']['ObjectName']
-                        fname = vname.split("_")
-                        VehName = GetVehicleName(vname)
-                        print(VehName)
-                        LogFile.write("Detected " + vname + " at position " + str(i) + "with reference name " + VehName + "\n")
-                        LogFile.flush() 
-                        Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetDirection", headers = header).json()
-                        if not Data['Result'] == "Error":
-                            self.LocoCount += 1
-                        if VehName == "Laaers":
-                            if fname[3] == "B":
-                                self.SkipCurrent = 1
-                            if fname[2] == "B":
-                                self.SkipCurrent = 1
-                        if not self.SkipCurrent:
-                            CurrentVehicle = Vehicle(VehName,i)
-                            LogFile.write(str(CurrentVehicle.PrintData()))
-                            res = CurrentVehicle.UpdateData()
-                            LogFile.write(f"res = {res}")
-                            if res:
-                                LogFile.write(f"searching data for vehicle with index = {i}")
-                                FoundData = FindData(i)
-                                CurrentVehicle.BTT = FoundData[0]
-                                CurrentVehicle.BPT = FoundData[1]
-                                CurrentVehicle.BCT = FoundData[2]
-                                CurrentVehicle.isWagon = FoundData[3]
-                                CurrentVehicle.CargoWeight = FoundData[4]
-                                CurrentVehicle.DType = FoundData[5]
-                                res = CurrentVehicle.UpdateData()
-
-                            LogFile.write(str(CurrentVehicle.PrintData()))
-                            if not str(CurrentVehicle.BTT) == str(0):
-                                self.HasGPRSwitch = 1
-
-                            self.FormationList.append(CurrentVehicle)
-                            list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
-
-
-                            self.FormationDisplay.AddVehicle(list)
-                            self.FormationDisplay.SetCellValue(i,6,CurrentVehicle.BrakeType)
-                            self.FormationDisplay.SetCellValue(i,7,"Open")
-                            LogFile.write("Adding Vehicle to UI list \n")
-                            LogFile.flush() 
-                            CurrentVehicle.SetSubs()
-                            if CurrentVehicle.BTT == 7:
-                                self.DoubleBrakeSwitchCount += 1
-                            if CurrentVehicle.BTT == 420:
-                                self.DoubleBrakeSwitchCount += 1
-                if self.HasGPRSwitch:
-                    self.Toggle5Button.Show()
-                    self.ToggleAllButton.Show()
-                else:
-                    self.Toggle5Button.Hide()
-                    self.ToggleAllButton.Hide()
-        
 
         self.MainPanel.SetSizer(self.MainSizer)
         self.MainSizer.Layout()
         self.LocoCount = self.LocoCount -1
-
+        self.WindowSizer.Layout()
 
         self.MainPanel.SetBackgroundColour(self.BackgroundColourC)
         self.statustext.SetForegroundColour(self.TextColourC)
@@ -1607,6 +1616,88 @@ class MainWindowClass(wx.Frame):
         self.Refresh()
         self.Show(True)
         self.Center()
+        if IsTSWOpen():
+            requests.delete(tswapi + "/subscription/?Subscription=42", headers = header)
+            ReqData = request.get(tswapi + "/list/CurrentFormation", headers = header).json()
+            if ReqData['Result'] == "Error":
+                self.statustext.SetLabel("Waiting for formation")
+                LogFile.write("Waiting for formation... \n")
+                LogFile.flush() # Add this line
+            else:
+
+                self.text = request.get(tswapi + "/get/CurrentFormation.FormationLength", headers = header)
+                self.text = self.text.json()
+                self.fl = int(self.text['Values']['FormationLength'])
+                self.VehCount = self.fl
+                LogFile.write("Detected " + str(self.VehCount) + " vehicles \n")
+                LogFile.flush() 
+                self.FormationLength = 0.0
+                self.FormationList = []
+                for i in range(self.fl):
+                        self.SkipCurrent = 0
+                        vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).json()
+                        vname = vname['Values']['ObjectName']
+                        fname = vname.split("_")
+                        VehName = GetVehicleName(vname)
+                        print(VehName)
+                        LogFile.write("Detected " + vname + " at position " + str(i) + " with reference name " + VehName + "\n")
+                        LogFile.flush() 
+                        Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetDirection", headers = header).json()
+                        if not Data['Result'] == "Error":
+                            self.LocoCount += 1
+                        if VehName == "Laaers":
+                            if fname[3] == "B":
+                                self.SkipCurrent = 1
+                            if fname[2] == "B":
+                                self.SkipCurrent = 1
+                            if fname[4] == "B":
+                                self.SkipCurrent = 1
+                        if not self.SkipCurrent:
+                            self.AVH = self.AVH + 1
+                            CurrentVehicle = Vehicle(VehName,i)
+                            LogFile.write(str(CurrentVehicle.PrintData()))
+                            LogFile.write("\n")
+                            LogFile.flush()
+                            res = CurrentVehicle.UpdateData()
+                            LogFile.write(f"res = {res}")
+                            if res:
+                                LogFile.write(f"searching data for vehicle with index = {i} \n")
+                                FoundData = FindData(i)
+                                CurrentVehicle.BTT = FoundData[0]
+                                CurrentVehicle.BPT = FoundData[1]
+                                CurrentVehicle.BCT = FoundData[2]
+                                CurrentVehicle.isWagon = FoundData[3]
+                                CurrentVehicle.CargoWeight = FoundData[4]
+                                CurrentVehicle.DType = FoundData[5]
+                                res = CurrentVehicle.UpdateData()
+
+                            LogFile.write(str(CurrentVehicle.PrintData()))
+                            if not str(CurrentVehicle.BTT) == str(0):
+                                self.HasGPRSwitch = 1
+
+                            self.FormationList.append(CurrentVehicle)
+                            list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
+                            self.FormationDisplay.AddVehicle(list)
+                            self.FormationDisplay.SetCellValue(self.AVH-1,6,CurrentVehicle.BrakeType)
+                            self.FormationDisplay.SetCellValue(self.AVH-1,7,"Open")
+                            LogFile.write("Adding Vehicle to UI list \n")
+                            LogFile.flush() 
+                            CurrentVehicle.SetSubs()
+                            self.MainSizer.Layout()
+                            self.ButtonSizer.Layout()
+                            self.WindowSizer.Layout()
+                            self.Refresh()
+                            if CurrentVehicle.BTT == 7:
+                                self.DoubleBrakeSwitchCount += 1
+                            if CurrentVehicle.BTT == 420:
+                                self.DoubleBrakeSwitchCount += 1
+                if self.HasGPRSwitch:
+                    self.Toggle5Button.Show()
+                    self.ToggleAllButton.Show()
+                else:
+                    self.Toggle5Button.Hide()
+                    self.ToggleAllButton.Hide()
+        self.Refresh()            
         self.Bind(wx.EVT_CHOICE,self.OnThemeChange,id = ID.ThemeChoiceID)
         self.Bind(wx.EVT_CHECKBOX,self.OnTopToggleF,id = ID.OnTopToggleID)
         self.Bind(wx.EVT_CHOICE,self.OnSelection,id = ID.PressureChoiceID)
@@ -1617,12 +1708,11 @@ class MainWindowClass(wx.Frame):
         self.Bind(wx.EVT_BUTTON,self.OnColumnToggle, id= ID.ToggleColumnButtonID)
         self.UpdateThread = threading.Thread(target=self.RequestUpdate)
         self.UpdateThread.daemon = True
-        #self.UpdateThread.start()
+        self.UpdateThread.start()
     def OnColumnToggle(self,event):
         col = ColumnDialog(self,7)
         col.Show()
     def OnThemeChange(self,event):
-        print("ontheme")
         if event.GetSelection() == 0:
             self.BackgroundColourC = [51,51,51]
             self.TextColourC = [137,206,148]
@@ -1678,7 +1768,6 @@ class MainWindowClass(wx.Frame):
         Row = event.GetRow()
         Value = self.FormationDisplay.GetCellValue(Row,Col)
         Value = "[" + str(Value) + "]"
-        print(Value)
         if Col > 5:
                 if Col == 6:
                     self.FormationList[Row].SetBM(Value)
@@ -1691,7 +1780,6 @@ class MainWindowClass(wx.Frame):
     def UpdateText(self,text):
         self.statustext.SetLabel(text)
     def ToggleBrake(self,mode = 0):
-        print("thread entered")
         if not mode:
             if str(self.FormationList[1+self.LocoCount].Name) == "Sggmrss":
                 for i in range(0,7+self.LocoCount):
@@ -1703,11 +1791,9 @@ class MainWindowClass(wx.Frame):
             for i in range(1,self.FormationDisplay.GetNumberRows()):
                 self.FormationList[i].SetBM(0)
     def OnToggle5(self,event):
-        print("here1")
         self.TogThread = threading.Thread(target = self.ToggleBrake, args = [0])
         self.TogThread.start()
     def OnToggleAll(self,event):
-        print("here2")
         self.TogThread = threading.Thread(target = self.ToggleBrake, args = [1])
         self.TogThread.start()
     
@@ -1739,7 +1825,6 @@ class MainWindowClass(wx.Frame):
             HasDoubleBrake = 0
             Vidx = int(i/6) #vehicle index, divided by 6 because there are 6 entries(7 for BTT = 7/ BTT =420) for each vehicle
             #getting values
-            print(i)
             if not PU: #BAR Pressure
                 if not str(UpdateData['Entries'][i]['Values']) == "None":
                     BP = UpdateData['Entries'][i]['Values']['Pressure_BAR_G']
@@ -1771,8 +1856,12 @@ class MainWindowClass(wx.Frame):
                     BMstr += self.FormationList[Vidx].GetBM(BI)
                     i = i+1
             if not str(UpdateData['Entries'][i+5]['Values']) == "None":
-                    DI = UpdateData['Entries'][i+5]['Values']['ReturnValue']
-                    Dstr = self.FormationList[Vidx].GetDstr(DI)
+                    if not self.FormationList[Vidx].DType == 5:
+                        DI = UpdateData['Entries'][i+5]['Values']['ReturnValue']
+                        Dstr = self.FormationList[Vidx].GetDstr(DI)
+                    else:
+                        DI = UpdateData['Entries'][i+5]['Values']['ValvePosition']
+                        Dstr = self.FormationList[Vidx].GetDstr(DI)
 
 
             #updating the grid
@@ -1789,14 +1878,16 @@ class MainWindowClass(wx.Frame):
     def ClearList(self):
         print("Clearing...")
         self.VehCount = 0
-        self.Freeze()
         self.statustext.SetLabel("No Formation Detected,Clearing UI")
         if self.FormationDisplay.GetNumberRows() >0 :
+            self.Freeze()
             print(self.FormationDisplay.GetNumberRows())
             self.FormationDisplay.DeleteRows(0,self.FormationDisplay.GetNumberRows())
             self.FormationDisplay.ClearGrid()
+            self.Thaw()
         
-        self.Thaw()
+        
+
         self.statustext.SetLabel("Waiting for Formation")
     
     def UpdateOptions(self):
@@ -1826,19 +1917,20 @@ class MainWindowClass(wx.Frame):
                     fname = vname.split("_")
                     VehName = GetVehicleName(vname)
                     LogFile.write("Detected " + vname + " at position " + str(i) + "with reference name " + VehName + "\n")
-                    print("Detected " + vname + " at position " + str(i) + "with reference name " + VehName + "\n")
                     if VehName == "Laaers":
                         self.SkipNext = 1
                         if fname[3] == "B":
                             self.SkipCurrent = 1
                         if fname[2] == "B":
                             self.SkipCurrent = 1
+                        if fname[4] == "B":
+                            self.SkipCurrent = 1
                     if not self.SkipCurrent:          
                         CurrentVehicle = Vehicle(VehName,i)
                         LogFile.write(str(CurrentVehicle.PrintData()))
                         res = CurrentVehicle.UpdateData()
                         if res:
-                            LogFile.write(f"searching data for vehicle with index = {i}")
+                            LogFile.write(f"searching data for vehicle with index = {i} \n")
                             FoundData = FindData(i)
                             CurrentVehicle.BTT = FoundData[0]
                             CurrentVehicle.BPT = FoundData[1]
@@ -1949,5 +2041,5 @@ class MainWindowClass(wx.Frame):
 
 
 app = wx.App(True,"ProgramOutput.log",)
-MainWindow = MainWindowClass(None, "Formation Viewer 0.6.1")
+MainWindow = MainWindowClass(None, "Formation Viewer 1.0")
 app.MainLoop()

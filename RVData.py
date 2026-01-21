@@ -228,7 +228,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
-        "DiType" : 0,
+        "DiType" : 4,
     },
     "Es050" : {
         "Weight": 11,
@@ -406,7 +406,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 2,
         "isWagon": True,
-        "DiType" : 1,
+        "DiType" : 5,
     },
     "Bmmz" : {
         "Weight": 50,
@@ -478,7 +478,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 1,
         "isWagon": True,
-        "DiType" : 1,
+        "DiType" : 5,
     },
     "Bpmz" : {
         "Weight": 50,
@@ -486,7 +486,7 @@ VehicleData = {
         "BPT": 1,
         "BCT": 2,
         "isWagon": True,
-        "DiType" : 1,
+        "DiType" : 5,
     },
     "Byg516" : {
         "Weight": 35,
