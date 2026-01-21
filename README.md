@@ -25,7 +25,8 @@ TSW Formation Viewer is a standalone application that aims to provide a real-tim
 
 ## Requirements
  TSW launched with the -HTTPAPI option
- Python 3.8 if running the non exe version
+ 
+ ---Python 3.8 if you run the code yourself
  
 ## How to Use
 1. Start either TSW or the Formation Viewer first
