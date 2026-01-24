@@ -23,11 +23,22 @@ tswapi = "http://127.0.0.1:31270"
 now = datetime.now()
 
 #searching for the key
-documents_path = Path.home() / "Documents/My Games/TrainSimWorld6/Saved/Config" 
-abc = str(documents_path)
-abc = abc + "/CommAPIKey.txt"
-print(f"The path is: {abc}")
-apifile = open(abc ,"r")
+Found = 0
+try:    
+    documents_path = Path.home() / "Documents/My Games/TrawinSimWorld6/Saved/Config" 
+    abc = str(documents_path)
+    abc = abc + "/CommAPIKey.txt"
+    apifile = open(abc ,"r")
+except FileNotFoundError:
+    try:
+        documents_path = Path.home() / "OneDrive/Documents/My Games/TrainSimWorld6/Saved/Config" 
+        abc = str(documents_path)
+        abc = abc + "/CommAPIKey.txt"
+        apifile = open(abc ,"r")
+    except:
+        print("here")
+        apifile = open("key.txt","r")
+
 ApiKey = apifile.read()
 
 header = {"DTGCommKey": ApiKey }
@@ -48,6 +59,17 @@ LogFile.write(str(now))
 LogFile.write("\n")
 LogFile.flush() 
  
+def GetColour(col):
+    print(col)
+    aux = col
+    aux = aux.split(',')
+    color = wx.Colour()
+    r = int(aux[0])
+    g = int(aux[1])
+    b = int(aux[2])
+    a= int(aux[3])
+    color.Set(r,g,b,a)
+    return color
 
 def IsTSWOpen():
     for p in psutil.process_iter():
@@ -1372,20 +1394,19 @@ class ThemeWindow(wx.Dialog):
         self.BTxt = wx.StaticText(self,-1, "Background Colour")
         self.GTxt = wx.StaticText(self,-1, "Gridline Colour")
         self.ITxt = wx.StaticText(self,-1,"Set Custom Theme using RGB Values")
-        self.TCCtrl = wx.TextCtrl(self,-1,"255,255,255")
-        self.BKCtrl = wx.TextCtrl(self,-1,"255,255,255")
-        self.GLCtrl = wx.TextCtrl(self,-1,"82,82,82")
         self.ok = wx.Button(self,120,"Set Theme")
+        self.TCCtrl = wx.ColourPickerCtrl(self,-1)
+        self.BCCtrl = wx.ColourPickerCtrl(self,-1)
+        self.GCCtrl = wx.ColourPickerCtrl(self,-1)
         self.TextSizer.Add(self.TTxt,1)
         self.TextSizer.Add(self.BTxt,1)
         self.TextSizer.Add(self.GTxt,1)
         self.TextSizer.Add(self.ok,1)
-        self.CtrlSizer.Add(self.ITxt,1)
-        self.CtrlSizer.Add(self.TCCtrl,1)
-        self.CtrlSizer.Add(self.BKCtrl,1)
-        self.CtrlSizer.Add(self.GLCtrl,1)
+        self.CtrlSizer.Add(self.TCCtrl)
+        self.CtrlSizer.Add(self.BCCtrl)
+        self.CtrlSizer.Add(self.GCCtrl)
         self.MainSizer.Add(self.TextSizer,1,wx.TOP,30)
-        self.MainSizer.Add(self.CtrlSizer,1)
+        self.MainSizer.Add(self.CtrlSizer,1,wx.TOP,30)
         self.SetSizer(self.MainSizer)
         self.MainSizer.Layout()
         self.Refresh()
@@ -1393,14 +1414,27 @@ class ThemeWindow(wx.Dialog):
         self.Center()
         self.Bind(wx.EVT_BUTTON,self.OnSet,source = self.ok)
     def OnSet(self,event):
+            print("")
+            b = str(self.BCCtrl.GetColour())
+            b = b.replace("(","")
+            b = b.replace(")","")
+            print(b)    
+            t = str(self.TCCtrl.GetColour())
+            t = t.replace("(","")
+            t = t.replace(")","")
+            g = str(self.GCCtrl.GetColour())
+            g = g.replace("(","")
+            g = g.replace(")","")
+            print("getting colour")
             file = open("Program.json","w")
             file.write("{")
             file.write("\n")
-            file.write('"' + "BackgroundColour" + '"' + ':' +" [" + self.BKCtrl.GetValue() +"],") 
+            file.write('"' + "BackgroundColour" + '"' + ':' +'"' + b +'"'  +"," ) 
+            print("i am here")
             file.write("\n")
-            file.write('"' + "TextColour" + '"' + ':' +" [" + self.TCCtrl.GetValue() +"],") 
+            file.write('"' + "TextColour" + '"' + ':' +'"' + t +'"' + "," ) 
             file.write("\n")
-            file.write('"' + "GridLineColour" + '"' + ':' +" [" + self.GLCtrl.GetValue() +"]") 
+            file.write('"' + "GridLineColour" + '"' + ':' +'"' + g +'"') 
             file.write("\n")
             file.write("}")
             file.close()
@@ -1504,9 +1538,6 @@ class MainWindowClass(wx.Frame):
     HasGPRSwitch = 0
     LocoCount = 0
     DoubleBrakeSwitchCount = 0
-    BackgroundColourC = []
-    TextColourC = []
-    GridLineColourC = []
     AVH = 0
     def __init__(self, parent, title):
         LogFile.write("Initializing Frame \n")
@@ -1516,9 +1547,10 @@ class MainWindowClass(wx.Frame):
             PFile = open("Program.json","r")
             PArgs = json.load(PFile)
             PFile.close()
-            self.BackgroundColourC = PArgs['BackgroundColour']
-            self.TextColourC = PArgs['TextColour']
-            self.GridLineColourC = PArgs['GridLineColour']
+            self.BackgroundColourC = GetColour(PArgs['BackgroundColour'])
+            self.TextColourC = GetColour(PArgs['TextColour'])
+            self.GridLineColourC = GetColour(PArgs['GridLineColour'])
+            print(self.BackgroundColourC)
         except FileNotFoundError as e:
             self.BackgroundColourC = [51,51,51]
             self.TextColourC = [137,206,148]
@@ -1738,11 +1770,12 @@ class MainWindowClass(wx.Frame):
 
     def UpdateTheme(self,TXT,BKG,GLC,fromFile = 0):
         if fromFile:
-            file = open("Program.json","r")
-            file = json.load(file)
-            TXT = file['TextColour']
-            BKG = file['BackgroundColour']
-            GLC = file['GridLineColour']
+            PFile = open("Program.json","r")
+            PArgs = json.load(PFile)
+            PFile.close()
+            BKG = GetColour(PArgs['BackgroundColour'])
+            TXT = GetColour(PArgs['TextColour'])
+            GLC = GetColour(PArgs['GridLineColour'])
         self.Freeze()
         self.MainPanel.SetBackgroundColour(BKG)
         self.statustext.SetForegroundColour(TXT)
@@ -2024,7 +2057,6 @@ class MainWindowClass(wx.Frame):
                         except requests.exceptions.ConnectionError as e:
                             print("error deleting subs")
                         VehCount = 0
-                        MainWindow.statustext.SetLabel("No formation found")
                         if MainWindow.VehCount:
                             wx.CallAfter(self.ClearList)
                         time.sleep(1)
@@ -2034,12 +2066,13 @@ class MainWindowClass(wx.Frame):
                             wx.CallAfter(self.OnRefresh,UpdateData)
             else:
                 self.UpdateText("Waiting for TSW")
-                self.ClearList()
+                if MainWindow.VehCount:
+                    self.ClearList()
             time.sleep(0.5)
 
     
 
 
-app = wx.App(True,"ProgramOutput.log",)
-MainWindow = MainWindowClass(None, "Formation Viewer 1.0")
+app = wx.App(False,"ProgramOutput.log",)
+MainWindow = MainWindowClass(None, "Formation Viewer 1.1")
 app.MainLoop()
