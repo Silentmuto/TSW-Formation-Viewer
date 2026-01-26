@@ -1,7 +1,7 @@
 import RVData
 import requests
-
-
+import wx
+import ID
 
 class Vehicle:
     Name = ""
