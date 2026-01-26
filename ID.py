@@ -7,4 +7,5 @@ ToggleAllID = 8
 ThemeChoiceID = 9
 ThemeWindowID = 10
 ToggleColumnButtonID = 11
+RefreshButtonID = 12
 ToggleColumnID = 100

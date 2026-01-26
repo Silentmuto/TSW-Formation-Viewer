@@ -19,3 +19,6 @@ def GetNullChoiceEditor():
 def GetDistributorEditor():
     DistributorChoiceEditor = wx.grid.GridCellChoiceEditor(["Close","Open"])
     return DistributorChoiceEditor
+def GetCouplerEditor():
+    CoupleEditor = wx.grid.GridCellChoiceEditor(["Couple","Uncouple"])
+    return CoupleEditor
