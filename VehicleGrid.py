@@ -8,7 +8,7 @@ class VehicleGrid(G.Grid):
 		G.Grid.__init__(self,parent)
 		self.CreateGrid(0,0)
 		self.SetRowLabelSize(30)
-		self.AppendCols(9)
+		self.AppendCols(10)
 		self.EnableCellEditControl(False)
 		self.SetColLabelValue(0,"Name")
 		self.SetColLabelValue(1,"Brake Mode")
@@ -18,8 +18,8 @@ class VehicleGrid(G.Grid):
 		self.SetColLabelValue(5,"Load")
 		self.SetColLabelValue(6,"Brake Switch")
 		self.SetColLabelValue(7,"Distributor Switch")
-		self.SetColLabelValue(8,"Coupling")
-		#self.SetColLabelValue(9,"Rear Coupler")
+		self.SetColLabelValue(8,"Uncouple")
+		self.SetColLabelValue(9,"Couple")
 		self.SetColMinimalWidth(7,140)
 		self.SetColSize(7,140)
 	def AddVehicle(self,values): #name, brake mode, BP,BC,Weight,Load,brakeType,isdstr
@@ -45,8 +45,8 @@ class VehicleGrid(G.Grid):
 			self.SetCellEditor(CurrentRow,7,lib.GetDistributorEditor())
 		else:
 			self.SetCellEditor(CurrentRow,7,lib.GetNullChoiceEditor())
-		self.SetCellEditor(CurrentRow,8,lib.GetCouplerEditor())
-
+		self.SetCellRenderer(CurrentRow,8,lib.GetButtonRenderer(0))
+		self.SetCellRenderer(CurrentRow,9,lib.GetButtonRenderer(1))
 		#SettingCells to ReadOnly
 		self.SetReadOnly(CurrentRow,0)
 		self.SetReadOnly(CurrentRow,1)
@@ -54,4 +54,6 @@ class VehicleGrid(G.Grid):
 		self.SetReadOnly(CurrentRow,3)
 		self.SetReadOnly(CurrentRow,4)
 		self.SetReadOnly(CurrentRow,5)
+		self.SetReadOnly(CurrentRow,8)
+		self.SetReadOnly(CurrentRow,9)
 		
