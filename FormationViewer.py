@@ -93,11 +93,13 @@ def GetVehicleName(ObjectName):
     if str(vname[1]) == "RVM":
         tstring = vname[0]
     else:
-        tstring = vname[3]
+        if len(vname) > 3:
+            tstring = vname[3]
         if tstring.isdigit():
             tstring = vname[2] + vname[3]
         elif tstring == "DB":
-            tstring = vname[4]
+            if len(vname) >4:
+                tstring = vname[4]
         elif tstring == "A":
             tstring = vname[2]
         elif tstring == "B":
@@ -108,8 +110,9 @@ def GetVehicleName(ObjectName):
                     tstring = vname[1]
         if vname[3] == "Coaches":
                     tstring = vname[4]
-        if vname[4] == "Coaches":
-                    tstring = vname[5]
+        if len(vname) > 4:
+            if vname[4] == "Coaches":
+                        tstring = vname[5]
     return tstring
 
 class Vehicle:
@@ -1529,8 +1532,8 @@ class ColumnDialog(wx.Dialog):
         self.ColumnTog6 = wx.CheckBox(self,ID.ToggleColumnID+5,"Load")
         self.ColumnTog7 = wx.CheckBox(self,ID.ToggleColumnID+6,"Brake Selector")
         self.ColumnTog8 = wx.CheckBox(self,ID.ToggleColumnID+7,"Distributor Control")
-        self.ColumnTog9 = wx.CheckBox(self,ID.ToggleColumnID+8,"Coupler")
-        self.ColumnTog10 = wx.CheckBox(self,ID.ToggleColumnID+9,"Backup Coupler")
+        self.ColumnTog9 = wx.CheckBox(self,ID.ToggleColumnID+8,"Uncouple")
+        self.ColumnTog10 = wx.CheckBox(self,ID.ToggleColumnID+9,"Couple")
         self.ColumnLab= wx.CheckBox(self,ID.ToggleColumnID+10, "Column Labels(Titles)")
         self.ColumnSizer.Add(self.ColumnTog1,0)
         self.ColumnSizer.Add(self.ColumnTog2,0)
@@ -1670,13 +1673,13 @@ class MainWindowClass(wx.Frame):
         self.PressureUnitChoice.SetSelection(0)
         self.ButtonSizer = wx.BoxSizer()
         self.MainSizer.Add(self.FormationDisplay,1,wx.EXPAND)
-        self.ButtonSizer.Add(self.OnTopToggle,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.PressureUnitChoice,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.Toggle5Button,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ToggleAllButton,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ThemeChoice,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ToggleColumnButton,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.RefreshButton,1,wx.LEFT,10)
+        self.ButtonSizer.Add(self.OnTopToggle,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.PressureUnitChoice,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.Toggle5Button,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.ToggleAllButton,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.ThemeChoice,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.ToggleColumnButton,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.RefreshButton,0,wx.LEFT,10)
         self.MainSizer.Add(self.ButtonSizer,0,wx.TOP,5)
 
 
@@ -2157,7 +2160,6 @@ class MainWindowClass(wx.Frame):
         LogFile.write("Rebuilding Formation \n")
         LogFile.flush() # Add this line
         requests.delete(tswapi + "/subscription/?Subscription=42", headers = header)
-        print("window destroyed")
         self.statustext.SetLabel("Rebuilding Formation")
         self.Freeze()
 
@@ -2260,11 +2262,8 @@ class MainWindowClass(wx.Frame):
                         self.LocoSign = "-"
                     for i in range(self.fl-1,-1,-1):
                             self.SkipCurrent = 0
-                            print(i)
-                            print(str(request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName", headers = header).url))
                             vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName", headers = header).json()
                             vname = vname['Values']['ObjectName']
-                            print(vname)
                             fname = vname.split("_")
                             VehName = GetVehicleName(vname)
                             print(VehName)
@@ -2313,7 +2312,7 @@ class MainWindowClass(wx.Frame):
                                         CurrentVehicle.isBackwards = True
                                 self.FormationList.append(CurrentVehicle)
                                 list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
-                                print(list)
+                                
                                 self.FormationDisplay.AddVehicle(list)
                                 self.FormationDisplay.SetCellValue(self.AVH-1,6,CurrentVehicle.BrakeType)
                                 self.FormationDisplay.SetCellValue(self.AVH-1,7,"Open")
@@ -2414,11 +2413,11 @@ class MainWindowClass(wx.Frame):
                 self.UpdateText("Waiting for TSW")
                 if MainWindow.VehCount:
                     self.ClearList()
-            time.sleep(0.5)
+            time.sleep(0.3)
 
     
 
 
-app = wx.App(True,"ProgramOutput.log",)
+app = wx.App(False,"ProgramOutput.log",)
 MainWindow = MainWindowClass(None, "Formation Viewer 1.2")
 app.MainLoop()
