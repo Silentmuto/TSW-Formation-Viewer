@@ -93,11 +93,13 @@ def GetVehicleName(ObjectName):
     if str(vname[1]) == "RVM":
         tstring = vname[0]
     else:
-        tstring = vname[3]
+        if len(vname) > 3:
+            tstring = vname[3]
         if tstring.isdigit():
             tstring = vname[2] + vname[3]
         elif tstring == "DB":
-            tstring = vname[4]
+            if len(vname) >4:
+                tstring = vname[4]
         elif tstring == "A":
             tstring = vname[2]
         elif tstring == "B":
@@ -108,8 +110,9 @@ def GetVehicleName(ObjectName):
                     tstring = vname[1]
         if vname[3] == "Coaches":
                     tstring = vname[4]
-        if vname[4] == "Coaches":
-                    tstring = vname[5]
+        if len(vname) > 4:
+            if vname[4] == "Coaches":
+                        tstring = vname[5]
     return tstring
 
 class Vehicle:
@@ -126,6 +129,7 @@ class Vehicle:
     index = 0
     DType = 0
     CType = 0
+    isBackwards = False
     def __init__(self,Vname,index):
         self.Name = Vname
         #print(Vname)
@@ -155,6 +159,7 @@ class Vehicle:
             
             
 
+
     def PrintData(self):
             return [self.Name, "BTT = " + str(self.BTT), "BPT = " + str(self.BPT),"BCT = " + str(self.BCT)]
     
@@ -163,6 +168,8 @@ class Vehicle:
          return [self.Name, self.BrakeType, "BP: " + str(self.BP), "BC: " + str(self.BC), "Weight: " + str(self.TotalWeight)+"T", "Load: "+str(self.CargoWeight)+"T"]
 
     def GetCouplerType(self):
+        if self.Name == "Sggmrss":
+            self.CType = 5
         CData = request.get(tswapi + "/list/CurrentFormation/" + str(self.index) + "/Coupler_F%20(Hook)/",headers = header).json()
         if not CData['Result'] == "Error":
             self.CType = 1
@@ -993,11 +1000,6 @@ class Vehicle:
             
     def SetBM(self,Brake):
         BIndex = self.GetBMInt2(Brake)
-        if self.Name == "Laaers":
-                if BIndex:
-                    BIndex = 0
-                else:
-                    BIndex = 1
         print(f"Bindex = {BIndex}")
         if not self.BTT == 11:
             if not self.BTT == 5:
@@ -1262,50 +1264,55 @@ class Vehicle:
                 request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AirBrakeSelector_R.InputValue?Value="+str(Value), headers = header)
     def ChangeCoupling(self,selection,side):
         #Function.PerformManualCouple
-        print(f"selection = {selection}, side = {side}")
-        if selection == "[Couple]":
-            selection = 0
+        if not self.CType == 5:
+            if self.isBackwards:
+                    if side == 1:
+                        side = 0
+                    else:
+                        side = 1
+            if selection == 0:
+                if side == 0:
+                    if self.CType == 1:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_B%20(Hook).Function.PerformManualCouple",headers = header)
+                    if self.CType == 2:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_B.Function.PerformManualCouple",headers = header)
+                    if self.CType == 3:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Hook_B(Coupler).Function.PerformManualCouple",headers = header)
+                    if self.CType == 4:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler(Hook)_B.Function.PerformManualCouple",headers = header)
+                if side == 1:
+                    if self.CType == 1:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_F%20(Hook).Function.PerformManualCouple",headers = header)
+                    if self.CType == 2:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_F.Function.PerformManualCouple",headers = header)
+                    if self.CType == 3:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Hook_F(Coupler).Function.PerformManualCouple",headers = header)
+                    if self.CType == 4:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler(Hook)_F.Function.PerformManualCouple",headers = header)
+            else:
+                if side == 0:
+                    if self.CType == 1:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_B%20(Hook).Function.PerformManualUncouple",headers = header).json()
+                    if self.CType == 2:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_B.Function.PerformManualUncouple",headers = header)
+                    if self.CType == 3:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Hook_B(Coupler).Function.PerformManualUncouple",headers = header)
+                    if self.CType == 4:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler(Hook)_B.Function.PerformManualUncouple",headers = header)
+                if side == 1:
+                    if self.CType == 1:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_F%20(Hook).Function.PerformManualUncouple",headers = header).json()
+                    if self.CType == 2:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_F.Function.PerformManualUncouple",headers = header).json()
+                    if self.CType == 3:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Hook_F(Coupler).Function.PerformManualUncouple",headers = header)
+                    if self.CType == 4:
+                        request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler(Hook)_F.Function.PerformManualUncouple",headers = header)
         else:
-            selection = 1
-        if selection == 0:
-            if side == 0:
-                if self.CType == 1:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_B%20(Hook).Function.PerformManualCouple",headers = header)
-                if self.CType == 2:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_B.Function.PerformManualCouple",headers = header)
-                if self.CType == 3:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Hook_B(Coupler).Function.PerformManualCouple",headers = header)
-                if self.CType == 4:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler(Hook)_B.Function.PerformManualCouple",headers = header)
-            if side == 1:
-                if self.CType == 1:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_F%20(Hook).Function.PerformManualCouple",headers = header)
-                if self.CType == 2:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_F.Function.PerformManualCouple",headers = header)
-                if self.CType == 3:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Hook_F(Coupler).Function.PerformManualCouple",headers = header)
-                if self.CType == 4:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler(Hook)_F.Function.PerformManualCouple",headers = header)
-        else:
-            if side == 0:
-                if self.CType == 1:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_B%20(Hook).Function.PerformManualUncouple",headers = header)
-                if self.CType == 2:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_B.Function.PerformManualUncouple",headers = header)
-                if self.CType == 3:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Hook_B(Coupler).Function.PerformManualUncouple",headers = header)
-                if self.CType == 4:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler(Hook)_B.Function.PerformManualUncouple",headers = header)
-            if side == 1:
-                if self.CType == 1:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_F%20(Hook).Function.PerformManualUncouple",headers = header)
-                if self.CType == 2:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler_F.Function.PerformManualUncouple",headers = header).json()
-                if self.CType == 3:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Hook_F(Coupler).Function.PerformManualUncouple",headers = header)
-                if self.CType == 4:
-                    request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler(Hook)_F.Function.PerformManualUncouple",headers = header)
-                    
+            if selection == 0:
+                request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler.Function.PerformManualCouple",headers = header)
+            else:
+                request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler.Function.PerformManualUncouple",headers = header)     
 
 def FindData(index):
     BTT = 0
@@ -1490,23 +1497,19 @@ class ThemeWindow(wx.Dialog):
         self.Center()
         self.Bind(wx.EVT_BUTTON,self.OnSet,source = self.ok)
     def OnSet(self,event):
-            print("")
             b = str(self.BCCtrl.GetColour())
             b = b.replace("(","")
             b = b.replace(")","")
-            print(b)    
             t = str(self.TCCtrl.GetColour())
             t = t.replace("(","")
             t = t.replace(")","")
             g = str(self.GCCtrl.GetColour())
             g = g.replace("(","")
             g = g.replace(")","")
-            print("getting colour")
             file = open("Program.json","w")
             file.write("{")
             file.write("\n")
             file.write('"' + "BackgroundColour" + '"' + ':' +'"' + b +'"'  +"," ) 
-            print("i am here")
             file.write("\n")
             file.write('"' + "TextColour" + '"' + ':' +'"' + t +'"' + "," ) 
             file.write("\n")
@@ -1529,8 +1532,9 @@ class ColumnDialog(wx.Dialog):
         self.ColumnTog6 = wx.CheckBox(self,ID.ToggleColumnID+5,"Load")
         self.ColumnTog7 = wx.CheckBox(self,ID.ToggleColumnID+6,"Brake Selector")
         self.ColumnTog8 = wx.CheckBox(self,ID.ToggleColumnID+7,"Distributor Control")
-        self.ColumnTog9 = wx.CheckBox(self,ID.ToggleColumnID+8,"Coupler")
-        self.ColumnLab= wx.CheckBox(self,ID.ToggleColumnID+9, "Column Labels(Titles)")
+        self.ColumnTog9 = wx.CheckBox(self,ID.ToggleColumnID+8,"Uncouple")
+        self.ColumnTog10 = wx.CheckBox(self,ID.ToggleColumnID+9,"Couple")
+        self.ColumnLab= wx.CheckBox(self,ID.ToggleColumnID+10, "Column Labels(Titles)")
         self.ColumnSizer.Add(self.ColumnTog1,0)
         self.ColumnSizer.Add(self.ColumnTog2,0)
         self.ColumnSizer.Add(self.ColumnTog3,0)
@@ -1540,6 +1544,7 @@ class ColumnDialog(wx.Dialog):
         self.ColumnSizer.Add(self.ColumnTog7,0)
         self.ColumnSizer.Add(self.ColumnTog8,0)
         self.ColumnSizer.Add(self.ColumnTog9,0)
+        self.ColumnSizer.Add(self.ColumnTog10,0)
         self.ColumnSizer.Add(self.ColumnLab,1,wx.LEFT)
         self.SetSizer(self.ColumnSizer)
         self.ColumnSizer.Layout()
@@ -1554,7 +1559,8 @@ class ColumnDialog(wx.Dialog):
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn7,id = ID.ToggleColumnID+6)
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn8,id = ID.ToggleColumnID+7)
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn9,id = ID.ToggleColumnID+8)
-        self.Bind(wx.EVT_CHECKBOX,self.OnColumnLab,id = ID.ToggleColumnID+9)
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumn10,id = ID.ToggleColumnID+9)
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumnLab,id = ID.ToggleColumnID + 10)
 
     def OnColumnLab(self,event):
         if not self.hidden:
@@ -1610,6 +1616,11 @@ class ColumnDialog(wx.Dialog):
             MainWindow.FormationDisplay.HideCol(8)
         else:
             MainWindow.FormationDisplay.ShowCol(8)
+    def OnColumn10(self,event):
+        if MainWindow.FormationDisplay.IsColShown(9):
+            MainWindow.FormationDisplay.HideCol(9)
+        else:
+            MainWindow.FormationDisplay.ShowCol(9)
 class MainWindowClass(wx.Frame):
     FormationList = []
     SkipCurrent = 0
@@ -1627,7 +1638,7 @@ class MainWindowClass(wx.Frame):
     def __init__(self, parent, title):
         LogFile.write("Initializing Frame \n")
         LogFile.flush() 
-        wx.Frame.__init__(self,parent,title = title, size = (800,500))
+        wx.Frame.__init__(self,parent,title = title, size = (900,500))
         try :
             PFile = open("Program.json","r")
             PArgs = json.load(PFile)
@@ -1635,7 +1646,6 @@ class MainWindowClass(wx.Frame):
             self.BackgroundColourC = GetColour(PArgs['BackgroundColour'])
             self.TextColourC = GetColour(PArgs['TextColour'])
             self.GridLineColourC = GetColour(PArgs['GridLineColour'])
-            print(self.BackgroundColourC)
         except FileNotFoundError as e:
             self.BackgroundColourC = [51,51,51]
             self.TextColourC = [137,206,148]
@@ -1663,13 +1673,13 @@ class MainWindowClass(wx.Frame):
         self.PressureUnitChoice.SetSelection(0)
         self.ButtonSizer = wx.BoxSizer()
         self.MainSizer.Add(self.FormationDisplay,1,wx.EXPAND)
-        self.ButtonSizer.Add(self.OnTopToggle,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.PressureUnitChoice,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.Toggle5Button,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ToggleAllButton,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ThemeChoice,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ToggleColumnButton,1,wx.LEFT,10)
-        self.ButtonSizer.Add(self.RefreshButton,1,wx.LEFT,10)
+        self.ButtonSizer.Add(self.OnTopToggle,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.PressureUnitChoice,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.Toggle5Button,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.ToggleAllButton,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.ThemeChoice,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.ToggleColumnButton,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.RefreshButton,0,wx.LEFT,10)
         self.MainSizer.Add(self.ButtonSizer,0,wx.TOP,5)
 
 
@@ -1751,68 +1761,156 @@ class MainWindowClass(wx.Frame):
                 LogFile.flush() 
                 self.FormationLength = 0.0
                 self.FormationList = []
-                for i in range(self.fl):
-                        self.SkipCurrent = 0
-                        print(i)
-                        print(str(request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).url))
-                        vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).json()
-                        vname = vname['Values']['ObjectName']
-                        print(vname)
-                        fname = vname.split("_")
-                        VehName = GetVehicleName(vname)
-                        print(VehName)
-                        LogFile.write("Detected " + vname + " at position " + str(i) + " with reference name " + VehName + "\n")
-                        LogFile.flush() 
-                        Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetSpeed", headers = header).json()
-                        if not Data['Result'] == "Error":
-                            self.LocoCount += 1
-                        if VehName == "Laaers":
-                            if fname[3] == "B":
-                                self.SkipCurrent = 1
-                            if fname[2] == "B":
-                                self.SkipCurrent = 1
-                            if fname[4] == "B":
-                                self.SkipCurrent = 1
-                        if not self.SkipCurrent:
-                            self.AVH = self.AVH + 1
-                            CurrentVehicle = Vehicle(VehName,i)
-                            LogFile.write(str(CurrentVehicle.PrintData()))
-                            LogFile.write("\n")
-                            LogFile.flush()
-                            res = CurrentVehicle.UpdateData()
-                            LogFile.write(f"res = {res}")
-                            if res:
-                                LogFile.write(f"searching data for vehicle with index = {i} \n")
-                                FoundData = FindData(i)
-                                CurrentVehicle.BTT = FoundData[0]
-                                CurrentVehicle.BPT = FoundData[1]
-                                CurrentVehicle.BCT = FoundData[2]
-                                CurrentVehicle.isWagon = FoundData[3]
-                                CurrentVehicle.CargoWeight = FoundData[4]
-                                CurrentVehicle.DType = FoundData[5]
-                                res = CurrentVehicle.UpdateData()
+                ReqData = request.get(tswapi + "/get/CurrentFormation/0.Function.HUD_GetSpeed",headers = header).json()
 
-                            LogFile.write(str(CurrentVehicle.PrintData()))
-                            if not str(CurrentVehicle.BTT) == str(0):
-                                self.HasGPRSwitch = 1
-
-                            self.FormationList.append(CurrentVehicle)
-                            list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
-                            print(list)
-                            self.FormationDisplay.AddVehicle(list)
-                            self.FormationDisplay.SetCellValue(self.AVH-1,6,CurrentVehicle.BrakeType)
-                            self.FormationDisplay.SetCellValue(self.AVH-1,7,"Open")
-                            LogFile.write("Adding Vehicle to UI list \n")
+                if not ReqData['Result'] == "Error":
+                    self.isReverse = 0
+                    ReqData = request.get(tswapi + "/get/CurrentFormation/0/ModelChildActorComponent0.Function.GetForwardVector",headers = header).json()
+                    self.LocoSign = ReqData['Values']['ReturnValue']['y']
+                    if self.LocoSign < 0.0:
+                        self.LocoSign = "-"
+                    else:
+                        self.LocoSign = "+"
+                    for i in range(self.fl):
+                            self.SkipCurrent = 0
+                            vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).json()
+                            vname = vname['Values']['ObjectName']
+                            fname = vname.split("_")
+                            VehName = GetVehicleName(vname)
+                            LogFile.write("Detected " + vname + " at position " + str(i) + " with reference name " + VehName + "\n")
                             LogFile.flush() 
-                            CurrentVehicle.SetSubs()
-                            self.MainSizer.Layout()
-                            self.ButtonSizer.Layout()
-                            self.WindowSizer.Layout()
-                            self.Refresh()
-                            if CurrentVehicle.BTT == 7:
-                                self.DoubleBrakeSwitchCount += 1
-                            if CurrentVehicle.BTT == 420:
-                                self.DoubleBrakeSwitchCount += 1
+                            Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetSpeed", headers = header).json()
+ 
+                            if not Data['Result'] == "Error":
+                                self.LocoCount += 1
+                            if VehName == "Laaers":
+                                if fname[3] == "B":
+                                    self.SkipCurrent = 1
+                                if fname[2] == "B":
+                                    self.SkipCurrent = 1
+                                if fname[4] == "B":
+                                    self.SkipCurrent = 1
+                            if not self.SkipCurrent:
+                                self.AVH = self.AVH + 1
+                                CurrentVehicle = Vehicle(VehName,i)
+                                LogFile.write(str(CurrentVehicle.PrintData()))
+                                LogFile.write("\n")
+                                LogFile.flush()
+                                res = CurrentVehicle.UpdateData()
+                                LogFile.write(f"res = {res}")
+                                if res:
+                                    LogFile.write(f"searching data for vehicle with index = {i} \n")
+                                    FoundData = FindData(i)
+                                    CurrentVehicle.BTT = FoundData[0]
+                                    CurrentVehicle.BPT = FoundData[1]
+                                    CurrentVehicle.BCT = FoundData[2]
+                                    CurrentVehicle.isWagon = FoundData[3]
+                                    CurrentVehicle.CargoWeight = FoundData[4]
+                                    CurrentVehicle.DType = FoundData[5]
+                                    res = CurrentVehicle.UpdateData()
+                                LogFile.write(str(CurrentVehicle.PrintData()))
+                                if not str(CurrentVehicle.BTT) == str(0):
+                                    self.HasGPRSwitch = 1
+                                CurrentVehicle.GetCouplerType()
+                                ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/ModelChildActorComponent0.Function.GetForwardVector",headers = header).json()
+                                VehSign = ReqData['Values']['ReturnValue']['y']
+                                if VehSign < 0.0:
+                                    VehSign = "-"
+                                else:
+                                    VehSign = "+"
+                                if self.LocoSign != VehSign:
+                                    if not i == 0:
+                                        CurrentVehicle.isBackwards = True
+                                self.FormationList.append(CurrentVehicle)
+                                list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
+                                self.FormationDisplay.AddVehicle(list)
+                                self.FormationDisplay.SetCellValue(self.AVH-1,6,CurrentVehicle.BrakeType)
+                                self.FormationDisplay.SetCellValue(self.AVH-1,7,"Open")
+                                LogFile.write("Adding Vehicle to UI list \n")
+                                LogFile.flush() 
+                                CurrentVehicle.SetSubs()
+                                self.MainSizer.Layout()
+                                self.ButtonSizer.Layout()
+                                self.WindowSizer.Layout()
+                                self.Refresh()
+                                if CurrentVehicle.BTT == 7:
+                                    self.DoubleBrakeSwitchCount += 1
+                                if CurrentVehicle.BTT == 420:
+                                    self.DoubleBrakeSwitchCount += 1
+                else:
+                    self.isReverse = 1
+                    ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.fl-1) + "/ModelChildActorComponent0.Function.GetForwardVector",headers = header).json()
+                    self.LocoSign = ReqData['Values']['ReturnValue']['y']
+                    if self.LocoSign < 0.0:
+                        self.LocoSign = "+"
+                    else:
+                        self.LocoSign = "-"
+                    for i in range(self.fl-1,-1,-1):
+                            self.SkipCurrent = 0
+                            vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName", headers = header).json()
+                            vname = vname['Values']['ObjectName']
+                            fname = vname.split("_")
+                            VehName = GetVehicleName(vname)
+                            LogFile.write("Detected " + vname + " at position " + str(i) + " with reference name " + VehName + "\n")
+                            LogFile.flush() 
+                            Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetSpeed", headers = header).json()
+                            if not Data['Result'] == "Error":
+                                self.LocoCount += 1
+                            if VehName == "Laaers":
+                                if fname[3] == "B":
+                                    self.SkipCurrent = 1
+                                if fname[2] == "B":
+                                    self.SkipCurrent = 1
+                                if fname[4] == "B":
+                                    self.SkipCurrent = 1
+                            if not self.SkipCurrent:
+                                self.AVH = self.AVH + 1
+                                CurrentVehicle = Vehicle(VehName,i)
+                                LogFile.write(str(CurrentVehicle.PrintData()))
+                                LogFile.write("\n")
+                                LogFile.flush()
+                                res = CurrentVehicle.UpdateData()
+                                LogFile.write(f"res = {res}")
+                                if res:
+                                    LogFile.write(f"searching data for vehicle with index = {i} \n")
+                                    FoundData = FindData(i)
+                                    CurrentVehicle.BTT = FoundData[0]
+                                    CurrentVehicle.BPT = FoundData[1]
+                                    CurrentVehicle.BCT = FoundData[2]
+                                    CurrentVehicle.isWagon = FoundData[3]
+                                    CurrentVehicle.CargoWeight = FoundData[4]
+                                    CurrentVehicle.DType = FoundData[5]
+                                    res = CurrentVehicle.UpdateData()
+                                LogFile.write(str(CurrentVehicle.PrintData()))
+                                if not str(CurrentVehicle.BTT) == str(0):
+                                    self.HasGPRSwitch = 1
+                                CurrentVehicle.GetCouplerType()
+                                ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/ModelChildActorComponent0.Function.GetForwardVector",headers = header).json()
+                                VehSign = ReqData['Values']['ReturnValue']['y']
+                                if VehSign < 0.0:
+                                    VehSign = "-"
+                                else:
+                                    VehSign = "+"
+                                if self.LocoSign != VehSign:
+                                    if not i == self.fl-1:
+                                        CurrentVehicle.isBackwards = True
+                                self.FormationList.append(CurrentVehicle)
+                                list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
+                                self.FormationDisplay.AddVehicle(list)
+                                self.FormationDisplay.SetCellValue(self.AVH-1,6,CurrentVehicle.BrakeType)
+                                self.FormationDisplay.SetCellValue(self.AVH-1,7,"Open")
+                                LogFile.write("Adding Vehicle to UI list \n")
+                                LogFile.flush() 
+                                CurrentVehicle.SetSubs()
+                                self.MainSizer.Layout()
+                                self.ButtonSizer.Layout()
+                                self.WindowSizer.Layout()
+                                self.Refresh()
+                                if CurrentVehicle.BTT == 7:
+                                    self.DoubleBrakeSwitchCount += 1
+                                if CurrentVehicle.BTT == 420:
+                                    self.DoubleBrakeSwitchCount += 1
+                    self.FormationList[0].isBackwards = True
                 if self.HasGPRSwitch:
                     self.Toggle5Button.Show()
                     self.ToggleAllButton.Show()
@@ -1828,11 +1926,36 @@ class MainWindowClass(wx.Frame):
         self.Bind(wx.EVT_BUTTON,self.OnToggleAll, id = ID.ToggleAllID)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.grid.EVT_GRID_CELL_CHANGED,self.OnCellChanged)
+        self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.OnCellClick)
         self.Bind(wx.EVT_BUTTON,self.OnColumnToggle, id= ID.ToggleColumnButtonID)
         self.Bind(wx.EVT_BUTTON,self.OnRefreshButton,id = ID.RefreshButtonID)
+        self.Bind(wx.EVT_CLOSE,self.OnClose, source = self)
         self.UpdateThread = threading.Thread(target=self.RequestUpdate)
         self.UpdateThread.daemon = True
         self.UpdateThread.start()
+    def OnClose(self,event):
+            print("")
+            b = str(self.GetBackgroundColour())
+            b = b.replace("(","")
+            b = b.replace(")","")
+            t = str(self.GetForegroundColour())
+            t = t.replace("(","")
+            t = t.replace(")","")
+            g = str(self.GetBackgroundColour())
+            g = g.replace("(","")
+            g = g.replace(")","")
+            file = open("Program.json","w")
+            file.write("{")
+            file.write("\n")
+            file.write('"' + "BackgroundColour" + '"' + ':' +'"' + b +'"'  +"," ) 
+            file.write("\n")
+            file.write('"' + "TextColour" + '"' + ':' +'"' + t +'"' + "," ) 
+            file.write("\n")
+            file.write('"' + "GridLineColour" + '"' + ':' +'"' + g +'"') 
+            file.write("\n")
+            file.write("}")
+            file.close()
+            wx.Exit()
     def OnColumnToggle(self,event):
         col = ColumnDialog(self,7)
         col.Show()
@@ -1860,7 +1983,13 @@ class MainWindowClass(wx.Frame):
     def OnRefreshButton(self,event):
         self.RebuildFormation()
 
-
+    def OnCellClick(self,event):
+        Col = event.GetCol()
+        Row = event.GetRow()
+        if Col == 8:
+            self.FormationList[Row].ChangeCoupling(1,1)
+        if Col == 9:
+            self.FormationList[Row].ChangeCoupling(0,0)
     def UpdateTheme(self,TXT,BKG,GLC,fromFile = 0):
         if fromFile:
             PFile = open("Program.json","r")
@@ -1899,10 +2028,7 @@ class MainWindowClass(wx.Frame):
                     self.FormationList[Row].SetBM(Value)
                 if Col == 7:
                     self.FormationList[Row].SetDistrib(Value)
-                if Col == 8:
-                    self.FormationList[Row].ChangeCoupling(Value,1)
-                if Col == 9:
-                    self.FormationList[Row].ChangeCoupling(Value,0)
+
     def OnEraseBackground(self, event):
         pass 
     def OnTopToggleF(self,event):
@@ -2034,7 +2160,6 @@ class MainWindowClass(wx.Frame):
         LogFile.write("Rebuilding Formation \n")
         LogFile.flush() # Add this line
         requests.delete(tswapi + "/subscription/?Subscription=42", headers = header)
-        print("window destroyed")
         self.statustext.SetLabel("Rebuilding Formation")
         self.Freeze()
 
@@ -2046,68 +2171,168 @@ class MainWindowClass(wx.Frame):
         LogFile.flush() 
         self.FormationLength = 0.0
         self.FormationList = []
-        for i in range(self.fl):
-                        self.SkipCurrent = 0
-                        print(i)
-                        print(str(request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).url))
-                        vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).json()
-                        vname = vname['Values']['ObjectName']
-                        print(vname)
-                        fname = vname.split("_")
-                        VehName = GetVehicleName(vname)
-                        print(VehName)
-                        LogFile.write("Detected " + vname + " at position " + str(i) + " with reference name " + VehName + "\n")
-                        LogFile.flush() 
-                        Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetSpeed", headers = header).json()
-                        if not Data['Result'] == "Error":
-                            self.LocoCount += 1
-                        if VehName == "Laaers":
-                            if fname[3] == "B":
-                                self.SkipCurrent = 1
-                            if fname[2] == "B":
-                                self.SkipCurrent = 1
-                            if fname[4] == "B":
-                                self.SkipCurrent = 1
-                        if not self.SkipCurrent:
-                            self.AVH = self.AVH + 1
-                            CurrentVehicle = Vehicle(VehName,i)
-                            LogFile.write(str(CurrentVehicle.PrintData()))
-                            LogFile.write("\n")
-                            LogFile.flush()
-                            res = CurrentVehicle.UpdateData()
-                            LogFile.write(f"res = {res}")
-                            if res:
-                                LogFile.write(f"searching data for vehicle with index = {i} \n")
-                                FoundData = FindData(i)
-                                CurrentVehicle.BTT = FoundData[0]
-                                CurrentVehicle.BPT = FoundData[1]
-                                CurrentVehicle.BCT = FoundData[2]
-                                CurrentVehicle.isWagon = FoundData[3]
-                                CurrentVehicle.CargoWeight = FoundData[4]
-                                CurrentVehicle.DType = FoundData[5]
-                                res = CurrentVehicle.UpdateData()
+        ReqData = request.get(tswapi + "/get/CurrentFormation/0.Function.HUD_GetSpeed",headers = header).json()
 
-                            LogFile.write(str(CurrentVehicle.PrintData()))
-                            if not str(CurrentVehicle.BTT) == str(0):
-                                self.HasGPRSwitch = 1
-
-                            self.FormationList.append(CurrentVehicle)
-                            list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
-                            print(list)
-                            self.FormationDisplay.AddVehicle(list)
-                            self.FormationDisplay.SetCellValue(self.AVH-1,6,CurrentVehicle.BrakeType)
-                            self.FormationDisplay.SetCellValue(self.AVH-1,7,"Open")
-                            LogFile.write("Adding Vehicle to UI list \n")
+        if not ReqData['Result'] == "Error":
+                    self.isReverse = 0
+                    ReqData = request.get(tswapi + "/get/CurrentFormation/0/ModelChildActorComponent0.Function.GetForwardVector",headers = header).json()
+                    self.LocoSign = ReqData['Values']['ReturnValue']['y']
+                    if self.LocoSign < 0.0:
+                        self.LocoSign = "-"
+                    else:
+                        self.LocoSign = "+"
+                    for i in range(self.fl):
+                            self.SkipCurrent = 0
+                            print(i)
+                            print(str(request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).url))
+                            vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName ", headers = header).json()
+                            vname = vname['Values']['ObjectName']
+                            print(vname)
+                            fname = vname.split("_")
+                            VehName = GetVehicleName(vname)
+                            print(VehName)
+                            LogFile.write("Detected " + vname + " at position " + str(i) + " with reference name " + VehName + "\n")
                             LogFile.flush() 
-                            CurrentVehicle.SetSubs()
-                            self.MainSizer.Layout()
-                            self.ButtonSizer.Layout()
-                            self.WindowSizer.Layout()
-                            self.Refresh()
-                            if CurrentVehicle.BTT == 7:
-                                self.DoubleBrakeSwitchCount += 1
-                            if CurrentVehicle.BTT == 420:
-                                self.DoubleBrakeSwitchCount += 1
+                            Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetSpeed", headers = header).json()
+ 
+                            if not Data['Result'] == "Error":
+                                self.LocoCount += 1
+                            if VehName == "Laaers":
+                                if fname[3] == "B":
+                                    self.SkipCurrent = 1
+                                if fname[2] == "B":
+                                    self.SkipCurrent = 1
+                                if fname[4] == "B":
+                                    self.SkipCurrent = 1
+                            if not self.SkipCurrent:
+                                self.AVH = self.AVH + 1
+                                CurrentVehicle = Vehicle(VehName,i)
+                                LogFile.write(str(CurrentVehicle.PrintData()))
+                                LogFile.write("\n")
+                                LogFile.flush()
+                                res = CurrentVehicle.UpdateData()
+                                LogFile.write(f"res = {res}")
+                                if res:
+                                    LogFile.write(f"searching data for vehicle with index = {i} \n")
+                                    FoundData = FindData(i)
+                                    CurrentVehicle.BTT = FoundData[0]
+                                    CurrentVehicle.BPT = FoundData[1]
+                                    CurrentVehicle.BCT = FoundData[2]
+                                    CurrentVehicle.isWagon = FoundData[3]
+                                    CurrentVehicle.CargoWeight = FoundData[4]
+                                    CurrentVehicle.DType = FoundData[5]
+                                    res = CurrentVehicle.UpdateData()
+                                LogFile.write(str(CurrentVehicle.PrintData()))
+                                if not str(CurrentVehicle.BTT) == str(0):
+                                    self.HasGPRSwitch = 1
+                                CurrentVehicle.GetCouplerType()
+                                ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/ModelChildActorComponent0.Function.GetForwardVector",headers = header).json()
+                                VehSign = ReqData['Values']['ReturnValue']['y']
+                                if VehSign < 0.0:
+                                    VehSign = "-"
+                                else:
+                                    VehSign = "+"
+                                if self.LocoSign != VehSign:
+                                    if not i == 0:
+                                        CurrentVehicle.isBackwards = True
+                                self.FormationList.append(CurrentVehicle)
+                                list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
+                                print(list)
+                                self.FormationDisplay.AddVehicle(list)
+                                self.FormationDisplay.SetCellValue(self.AVH-1,6,CurrentVehicle.BrakeType)
+                                self.FormationDisplay.SetCellValue(self.AVH-1,7,"Open")
+                                LogFile.write("Adding Vehicle to UI list \n")
+                                LogFile.flush() 
+                                CurrentVehicle.SetSubs()
+                                self.MainSizer.Layout()
+                                self.ButtonSizer.Layout()
+                                self.WindowSizer.Layout()
+                                self.Refresh()
+                                if CurrentVehicle.BTT == 7:
+                                    self.DoubleBrakeSwitchCount += 1
+                                if CurrentVehicle.BTT == 420:
+                                    self.DoubleBrakeSwitchCount += 1
+        else:
+                    self.isReverse = 1
+                    ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.fl-1) + "/ModelChildActorComponent0.Function.GetForwardVector",headers = header).json()
+                    self.LocoSign = ReqData['Values']['ReturnValue']['y']
+                    if self.LocoSign < 0.0:
+                        self.LocoSign = "+"
+                    else:
+                        self.LocoSign = "-"
+                    for i in range(self.fl-1,-1,-1):
+                            self.SkipCurrent = 0
+                            vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName", headers = header).json()
+                            vname = vname['Values']['ObjectName']
+                            fname = vname.split("_")
+                            VehName = GetVehicleName(vname)
+                            print(VehName)
+                            LogFile.write("Detected " + vname + " at position " + str(i) + " with reference name " + VehName + "\n")
+                            LogFile.flush() 
+                            Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetSpeed", headers = header).json()
+                            if not Data['Result'] == "Error":
+                                self.LocoCount += 1
+                            if VehName == "Laaers":
+                                if fname[3] == "B":
+                                    self.SkipCurrent = 1
+                                if fname[2] == "B":
+                                    self.SkipCurrent = 1
+                                if fname[4] == "B":
+                                    self.SkipCurrent = 1
+                            if not self.SkipCurrent:
+                                self.AVH = self.AVH + 1
+                                CurrentVehicle = Vehicle(VehName,i)
+                                LogFile.write(str(CurrentVehicle.PrintData()))
+                                LogFile.write("\n")
+                                LogFile.flush()
+                                res = CurrentVehicle.UpdateData()
+                                LogFile.write(f"res = {res}")
+                                if res:
+                                    LogFile.write(f"searching data for vehicle with index = {i} \n")
+                                    FoundData = FindData(i)
+                                    CurrentVehicle.BTT = FoundData[0]
+                                    CurrentVehicle.BPT = FoundData[1]
+                                    CurrentVehicle.BCT = FoundData[2]
+                                    CurrentVehicle.isWagon = FoundData[3]
+                                    CurrentVehicle.CargoWeight = FoundData[4]
+                                    CurrentVehicle.DType = FoundData[5]
+                                    res = CurrentVehicle.UpdateData()
+                                LogFile.write(str(CurrentVehicle.PrintData()))
+                                if not str(CurrentVehicle.BTT) == str(0):
+                                    self.HasGPRSwitch = 1
+                                CurrentVehicle.GetCouplerType()
+                                ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(i) + "/ModelChildActorComponent0.Function.GetForwardVector",headers = header).json()
+                                VehSign = ReqData['Values']['ReturnValue']['y']
+                                if VehSign < 0.0:
+                                    VehSign = "-"
+                                else:
+                                    VehSign = "+"
+                                if self.LocoSign != VehSign:
+                                    if not i == self.fl-1:
+                                        CurrentVehicle.isBackwards = True
+                                self.FormationList.append(CurrentVehicle)
+                                list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
+                                
+                                self.FormationDisplay.AddVehicle(list)
+                                self.FormationDisplay.SetCellValue(self.AVH-1,6,CurrentVehicle.BrakeType)
+                                self.FormationDisplay.SetCellValue(self.AVH-1,7,"Open")
+                                LogFile.write("Adding Vehicle to UI list \n")
+                                LogFile.flush() 
+                                CurrentVehicle.SetSubs()
+                                self.MainSizer.Layout()
+                                self.ButtonSizer.Layout()
+                                self.WindowSizer.Layout()
+                                self.Refresh()
+                                if CurrentVehicle.BTT == 7:
+                                    self.DoubleBrakeSwitchCount += 1
+                                if CurrentVehicle.BTT == 420:
+                                    self.DoubleBrakeSwitchCount += 1
+    
+
+
+
+
+
         if self.HasGPRSwitch:
             self.Toggle5Button.Show()
             self.ToggleAllButton.Show()
@@ -2140,10 +2365,12 @@ class MainWindowClass(wx.Frame):
                                 vname = vname['Values']['ObjectName']
                                 fname = vname.split("_")
                                 VehName2 = GetVehicleName(vname)
-                                if not VehName == self.FormationList[0].Name:
-                                    SkipToRebuild = 1
-                                if not VehName2 == self.FormationList[1].Name:
-                                    SkipToRebuild = 1
+                                if not self.isReverse:
+                                    if not VehName == self.FormationList[0].Name:
+                                        SkipToRebuild = 1
+                                    if not VehName2 == self.FormationList[1].Name:
+                                        SkipToRebuild = 1
+
                     except requests.exceptions.ConnectionError as e:
                         continue
                     if not isForm['Result'] == "Error":
@@ -2186,7 +2413,7 @@ class MainWindowClass(wx.Frame):
                 self.UpdateText("Waiting for TSW")
                 if MainWindow.VehCount:
                     self.ClearList()
-            time.sleep(0.5)
+            time.sleep(0.3)
 
     
 
