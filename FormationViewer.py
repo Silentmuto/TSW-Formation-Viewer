@@ -1986,10 +1986,13 @@ class MainWindowClass(wx.Frame):
     def OnCellClick(self,event):
         Col = event.GetCol()
         Row = event.GetRow()
-        if Col == 8:
-            self.FormationList[Row].ChangeCoupling(1,1)
-        if Col == 9:
-            self.FormationList[Row].ChangeCoupling(0,0)
+        if Col > 7:
+            if Col == 8:
+                self.FormationList[Row].ChangeCoupling(1,1)
+            if Col == 9:
+                self.FormationList[Row].ChangeCoupling(0,0)
+        else:
+            event.Skip()
     def UpdateTheme(self,TXT,BKG,GLC,fromFile = 0):
         if fromFile:
             PFile = open("Program.json","r")
@@ -2312,7 +2315,7 @@ class MainWindowClass(wx.Frame):
                                         CurrentVehicle.isBackwards = True
                                 self.FormationList.append(CurrentVehicle)
                                 list = CurrentVehicle.ReturnSequence() + [CurrentVehicle.GetBrakeEditor()] + [CurrentVehicle.DType]
-                                
+
                                 self.FormationDisplay.AddVehicle(list)
                                 self.FormationDisplay.SetCellValue(self.AVH-1,6,CurrentVehicle.BrakeType)
                                 self.FormationDisplay.SetCellValue(self.AVH-1,7,"Open")
@@ -2418,6 +2421,6 @@ class MainWindowClass(wx.Frame):
     
 
 
-app = wx.App(False,"ProgramOutput.log",)
+app = wx.App(True,"ProgramOutput.log",)
 MainWindow = MainWindowClass(None, "Formation Viewer 1.2")
 app.MainLoop()
