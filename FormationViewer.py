@@ -15,8 +15,7 @@ import wx.lib.buttons as buttons
 import ID
 import VehicleGrid as VG
 import wx.grid
-#subscription id = 42
-#add reverse display
+#750 = Simulation/BrakePipe Simulation/BC_1
 PU = 0
 tswapi = "http://127.0.0.1:31270"   
 
@@ -85,6 +84,7 @@ def GetVehicleName(ObjectName):
     fname = vname
     vname = vname.split('_')
     aux = vname
+
     for i in range(len(vname)):
         if not vname[i].find("Class") == -1:
             return vname[i]
@@ -92,6 +92,8 @@ def GetVehicleName(ObjectName):
             return vname[i-1] +" " +  vname[i]
     if str(vname[1]) == "RVM":
         tstring = vname[0]
+    if str(vname[1]) == "LBSP":
+        return str(vname[2])
     else:
         if len(vname) > 3:
             tstring = vname[3]
@@ -193,6 +195,7 @@ class Vehicle:
     def UpdateData(self):
             HasError = 0
             BR = -1
+            ReqData = 0
             LogFile.write(f"Running update for vehicle i = {self.index}, name = {self.Name} \n")
             #print("PU is " + str(PU))
             if self.BPT == 1:
@@ -203,14 +206,17 @@ class Vehicle:
             
             if self.BPT == 3:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Simulation/HL." + RVData.PressureUnit[PU]+ "", headers = header).json()
-            if not ReqData['Result'] == "Error":
-                self.BP = float(ReqData['Values'][RVData.PressureUnit[PU] ])
-                self.BP = round(self.BP,1)
+            if self.BPT == 4:
+                ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Simulation/BrakePipe." + RVData.PressureUnit[PU] +"", headers = header).json()
+            if not ReqData == 0:
+                if not ReqData['Result'] == "Error":
+                    self.BP = float(ReqData['Values'][RVData.PressureUnit[PU] ])
+                    self.BP = round(self.BP,1)
             else:
-                LogFile.write(f"Error finding BP values for  vehicle {self.Name} \n")
-                LogFile.flush() 
-                HasError = 1
-            
+                    LogFile.write(f"Error finding BP values for  vehicle {self.Name} \n")
+                    LogFile.flush() 
+                    HasError = 1
+            ReqData = 0
             if self.BCT == 1:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[PU]+ "", headers = header).json()    
             if self.BCT == 2:
@@ -225,13 +231,18 @@ class Vehicle:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Simulation//Bremszylinder1." + RVData.PressureUnit[PU]+ "", headers = header).json()
             if self.BCT == 7:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_2." + RVData.PressureUnit[PU]+ "", headers = header).json() 
-            if not ReqData['Result'] == "Error":
-                self.BC = float(ReqData['Values'][RVData.PressureUnit[PU]])
-                self.BC = round(self.BC,1)
-            else:
-                LogFile.write(f"Error finding BC values for  vehicle {self.Name} \n")
-                LogFile.flush() 
-                HasError = 1
+            if self.BCT == 8:
+                ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Simulation/BC_1." + RVData.PressureUnit[PU] +"", headers = header).json()
+            if self.BCT == 9:
+                ReqData == request.get(tswapi + "/get/CurrentFormation/" + str(self.index) +"/Simulation/BC_11_Complementary." + RVData.PressureUnit[PU] + "",headers = header).json()
+            if not ReqData == 0:
+                if not ReqData['Result'] == "Error":
+                    self.BC = float(ReqData['Values'][RVData.PressureUnit[PU]])
+                    self.BC = round(self.BC,1)
+                else:
+                    LogFile.write(f"Error finding BC values for  vehicle {self.Name} \n")
+                    LogFile.flush() 
+                    HasError = 1
 
             if self.BTT == 1:
                 ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.Function.GetCurrentNotchIndex", headers = header).json()
@@ -464,7 +475,9 @@ class Vehicle:
         if self.BPT == 3:
             request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/HL." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
             request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/HL." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
-
+        if self.BPT == 4:
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakePipe." + RVData.PressureUnit[0] +"?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakePipe." + RVData.PressureUnit[1] +"?Subscription=42", headers = header)
         #subs for BC pressure
 
         if self.BCT == 0:
@@ -491,7 +504,12 @@ class Vehicle:
         if self.BCT == 7:
                 request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_2." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
                 request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_2." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
-        
+        if self.BCT == 8:
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BC_1." + RVData.PressureUnit[0] +"?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BC_1." + RVData.PressureUnit[1] +"?Subscription=42", headers = header)
+        if self.BCT == 9:
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/BC_11_Complementary." + RVData.PressureUnit[0] + "?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/BC_11_Complementary." + RVData.PressureUnit[1] + "?Subscription=42",headers = header)
         #subs for BTT
         if self.BTT == 0:
             self.BrakeType = "[?]"
@@ -1333,8 +1351,12 @@ def FindData(index):
             if not ReqData['Result'] == "Error" :
                 BPT = 3
             else:
-                LogFile.write("BP not found for vehicle with id " + str(index) + "\n" )
-                LogFile.flush() # Add this line
+                ReqData = request.get(tswapi + "/list/CurrentFormation/" + str(index) +"/Simulation/Brakepipe/",headers = header).json()
+                if not ReqData['Result'] == "Error":
+                    BPT = 4
+                else:
+                    LogFile.write("BP not found for vehicle with id " + str(index) + "\n" )
+                    LogFile.flush() # Add this line
 
     
     ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[PU]+ "", headers = header).json() 
@@ -1365,8 +1387,16 @@ def FindData(index):
                              if not ReqData['Result'] == "Error":
                                 BCT = 7
                              else:
-                                 LogFile.write("Couldnt find BC for vehicle with index" + str(index) + "\n")
-                                 LogFile.flush() # Add this line
+                                ReqData = request.get(tswapi + "/list/CurrentFormation/" + str(index) +"/Simulation/BC_1/",headers = header).json()
+                                if not ReqData['Result'] == "Error":
+                                    BCT = 8
+                                else:
+                                    ReqData = request.get(tswapi + "/list/CurrentFormation/" + str(index) +"/Simulation/BC_11_Complementary/",headers = header).json()
+                                    if not ReqData['Result'] == "Error":
+                                        BCT = 9
+                                    else:
+                                        LogFile.write("Couldnt find BC for vehicle with index" + str(index) + "\n")
+                                        LogFile.flush() # Add this line
     
     # finding brake mode
     
@@ -1777,6 +1807,7 @@ class MainWindowClass(wx.Frame):
                             vname = vname['Values']['ObjectName']
                             fname = vname.split("_")
                             VehName = GetVehicleName(vname)
+                            print(VehName + "meow")
                             LogFile.write("Detected " + vname + " at position " + str(i) + " with reference name " + VehName + "\n")
                             LogFile.flush() 
                             Data = request.get(tswapi+ "/get/CurrentFormation/" + str(i) + ".Function.HUD_GetSpeed", headers = header).json()
@@ -2421,6 +2452,6 @@ class MainWindowClass(wx.Frame):
     
 
 
-app = wx.App(True,"ProgramOutput.log",)
-MainWindow = MainWindowClass(None, "Formation Viewer 1.2")
+app = wx.App(False,"ProgramOutput.log",)
+MainWindow = MainWindowClass(None, "Formation Viewer 1.2.1")
 app.MainLoop()
