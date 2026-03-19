@@ -1552,7 +1552,7 @@ class ThemeWindow(wx.Dialog):
 class ColumnDialog(wx.Dialog):
     hidden = 0
     def __init__(self,parent,ColumnList):
-        wx.Dialog.__init__(self,None,-1,"Column Toggle",(0,0),(350,150))
+        wx.Dialog.__init__(self,None,-1,"Column Toggle",(0,0),(350,180))
         self.ColumnSizer = wx.FlexGridSizer(2)
         self.ColumnTog1= wx.CheckBox(self,ID.ToggleColumnID,"Name")
         self.ColumnTog2 = wx.CheckBox(self,ID.ToggleColumnID+1,"Brake Mode")
@@ -1564,6 +1564,11 @@ class ColumnDialog(wx.Dialog):
         self.ColumnTog8 = wx.CheckBox(self,ID.ToggleColumnID+7,"Distributor Control")
         self.ColumnTog9 = wx.CheckBox(self,ID.ToggleColumnID+8,"Uncouple")
         self.ColumnTog10 = wx.CheckBox(self,ID.ToggleColumnID+9,"Couple")
+        self.ColumnTog11 = wx.CheckBox(self,ID.ToggleColumnID+10,"Front Anglecock")
+        self.ColumnTog12 = wx.CheckBox(self,ID.ToggleColumnID+11,"Rear Anglecock")
+        self.ColumnTog13 = wx.CheckBox(self,ID.ToggleColumnID+12,"Front Gladhand")
+        self.ColumnTog14 = wx.CheckBox(self,ID.ToggleColumnID+13,"Rear GladHand")
+        self.ColumnTog15 = wx.CheckBox(self,ID.ToggleColumnID+14,"Handbrake")
         self.ColumnLab= wx.CheckBox(self,ID.ToggleColumnID+10, "Column Labels(Titles)")
         self.ColumnSizer.Add(self.ColumnTog1,0)
         self.ColumnSizer.Add(self.ColumnTog2,0)
@@ -1575,6 +1580,11 @@ class ColumnDialog(wx.Dialog):
         self.ColumnSizer.Add(self.ColumnTog8,0)
         self.ColumnSizer.Add(self.ColumnTog9,0)
         self.ColumnSizer.Add(self.ColumnTog10,0)
+        self.ColumnSizer.Add(self.ColumnTog11,0)
+        self.ColumnSizer.Add(self.ColumnTog12,0)
+        self.ColumnSizer.Add(self.ColumnTog13,0)
+        self.ColumnSizer.Add(self.ColumnTog14,0)
+        self.ColumnSizer.Add(self.ColumnTog15,0)
         self.ColumnSizer.Add(self.ColumnLab,1,wx.LEFT)
         self.SetSizer(self.ColumnSizer)
         self.ColumnSizer.Layout()
@@ -1650,7 +1660,32 @@ class ColumnDialog(wx.Dialog):
         if MainWindow.FormationDisplay.IsColShown(9):
             MainWindow.FormationDisplay.HideCol(9)
         else:
-            MainWindow.FormationDisplay.ShowCol(9)
+            MainWindow.FormationDisplay.ShowCol(10)
+    def OnColumn11(self,event):
+        if MainWindow.FormationDisplay.IsColShown(10):
+            MainWindow.FormationDisplay.HideCol(10)
+        else:
+            MainWindow.FormationDisplay.ShowCol(11)
+    def OnColumn12(self,event):
+        if MainWindow.FormationDisplay.IsColShown(11):
+            MainWindow.FormationDisplay.HideCol(11)
+        else:
+            MainWindow.FormationDisplay.ShowCol(11)
+    def OnColumn13(self,event):
+        if MainWindow.FormationDisplay.IsColShown(12):
+            MainWindow.FormationDisplay.HideCol(12)
+        else:
+            MainWindow.FormationDisplay.ShowCol(12)
+    def OnColumn14(self,event):
+        if MainWindow.FormationDisplay.IsColShown(13):
+            MainWindow.FormationDisplay.HideCol(13)
+        else:
+            MainWindow.FormationDisplay.ShowCol(13)
+    def OnColumn15(self,event):
+        if MainWindow.FormationDisplay.IsColShown(14):
+            MainWindow.FormationDisplay.HideCol(14)
+        else:
+            MainWindow.FormationDisplay.ShowCol(14)
 class MainWindowClass(wx.Frame):
     FormationList = []
     SkipCurrent = 0
@@ -1771,6 +1806,7 @@ class MainWindowClass(wx.Frame):
         self.statustext.SetLabel("Displaying Formation")
         self.SetSizer(self.WindowSizer)
         self.WindowSizer.Layout()
+        self.FormationDisplay.AddVehicle(["test","g","0","0","100","0","4","0"],1)
         self.Refresh()
         self.Show(True)
         self.Center()
@@ -1948,7 +1984,7 @@ class MainWindowClass(wx.Frame):
                 else:
                     self.Toggle5Button.Hide()
                     self.ToggleAllButton.Hide()
-        
+
         self.Refresh()            
         self.Bind(wx.EVT_CHOICE,self.OnThemeChange,id = ID.ThemeChoiceID)
         self.Bind(wx.EVT_CHECKBOX,self.OnTopToggleF,id = ID.OnTopToggleID)
@@ -1963,7 +1999,7 @@ class MainWindowClass(wx.Frame):
         self.Bind(wx.EVT_CLOSE,self.OnClose, source = self)
         self.UpdateThread = threading.Thread(target=self.RequestUpdate)
         self.UpdateThread.daemon = True
-        self.UpdateThread.start()
+        #self.UpdateThread.start()
     def OnClose(self,event):
             print("")
             b = str(self.GetBackgroundColour())
