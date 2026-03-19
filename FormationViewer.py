@@ -1569,7 +1569,7 @@ class ColumnDialog(wx.Dialog):
         self.ColumnTog13 = wx.CheckBox(self,ID.ToggleColumnID+12,"Front Gladhand")
         self.ColumnTog14 = wx.CheckBox(self,ID.ToggleColumnID+13,"Rear GladHand")
         self.ColumnTog15 = wx.CheckBox(self,ID.ToggleColumnID+14,"Handbrake")
-        self.ColumnLab= wx.CheckBox(self,ID.ToggleColumnID+10, "Column Labels(Titles)")
+        self.ColumnLab= wx.CheckBox(self,ID.ToggleColumnID+15, "Column Labels(Titles)")
         self.ColumnSizer.Add(self.ColumnTog1,0)
         self.ColumnSizer.Add(self.ColumnTog2,0)
         self.ColumnSizer.Add(self.ColumnTog3,0)
@@ -1588,6 +1588,36 @@ class ColumnDialog(wx.Dialog):
         self.ColumnSizer.Add(self.ColumnLab,1,wx.LEFT)
         self.SetSizer(self.ColumnSizer)
         self.ColumnSizer.Layout()
+        if not MainWindow.FormationDisplay.IsColShown(0):
+            self.ColumnTog1.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(1):
+            self.ColumnTog2.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(2):
+            self.ColumnTog3.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(3):
+            self.ColumnTog4.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(4):
+            self.ColumnTog5.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(5):
+            self.ColumnTog6.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(6):
+            self.ColumnTog7.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(7):
+            self.ColumnTog8.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(8):
+            self.ColumnTog9.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(9):
+            self.ColumnTog10.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(10):
+            self.ColumnTog11.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(11):
+            self.ColumnTog12.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(12):
+            self.ColumnTog13.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(13):
+            self.ColumnTog14.SetValue(1) 
+        if not MainWindow.FormationDisplay.IsColShown(14):
+            self.ColumnTog15.SetValue(1)
         self.Show()
         self.Center()
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn1,id = ID.ToggleColumnID)
@@ -1600,8 +1630,47 @@ class ColumnDialog(wx.Dialog):
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn8,id = ID.ToggleColumnID+7)
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn9,id = ID.ToggleColumnID+8)
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn10,id = ID.ToggleColumnID+9)
-        self.Bind(wx.EVT_CHECKBOX,self.OnColumnLab,id = ID.ToggleColumnID + 10)
-
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumn11,id = ID.ToggleColumnID+10)
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumn12,id = ID.ToggleColumnID+11)
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumn13,id = ID.ToggleColumnID+12)
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumn14,id = ID.ToggleColumnID+13)
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumn15,id = ID.ToggleColumnID+14)
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumnLab,id = ID.ToggleColumnID + 15)
+        self.Bind(wx.EVT_CLOSE,self.OnClose,source = self)
+    def OnClose(self,event):
+        file = open("columns.ini","w")
+        file.write(str(self.ColumnTog1.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog2.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog3.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog4.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog5.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog6.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog7.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog8.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog9.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog10.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog11.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog12.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog13.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog14.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog15.IsChecked()))
+        file.write("\n")
+        file.close()
+        event.Skip()
     def OnColumnLab(self,event):
         if not self.hidden:
             MainWindow.FormationDisplay.HideColLabels()
@@ -1660,12 +1729,12 @@ class ColumnDialog(wx.Dialog):
         if MainWindow.FormationDisplay.IsColShown(9):
             MainWindow.FormationDisplay.HideCol(9)
         else:
-            MainWindow.FormationDisplay.ShowCol(10)
+            MainWindow.FormationDisplay.ShowCol(9)
     def OnColumn11(self,event):
         if MainWindow.FormationDisplay.IsColShown(10):
             MainWindow.FormationDisplay.HideCol(10)
         else:
-            MainWindow.FormationDisplay.ShowCol(11)
+            MainWindow.FormationDisplay.ShowCol(10)
     def OnColumn12(self,event):
         if MainWindow.FormationDisplay.IsColShown(11):
             MainWindow.FormationDisplay.HideCol(11)
@@ -1806,7 +1875,9 @@ class MainWindowClass(wx.Frame):
         self.statustext.SetLabel("Displaying Formation")
         self.SetSizer(self.WindowSizer)
         self.WindowSizer.Layout()
-        self.FormationDisplay.AddVehicle(["test","g","0","0","100","0","4","0"],1)
+        #4self.FormationDisplay.AddVehicle(["test","g","0","0","100","0","4","0"],1)
+        file = open("columns.ini","r")
+
         self.Refresh()
         self.Show(True)
         self.Center()
@@ -1999,7 +2070,12 @@ class MainWindowClass(wx.Frame):
         self.Bind(wx.EVT_CLOSE,self.OnClose, source = self)
         self.UpdateThread = threading.Thread(target=self.RequestUpdate)
         self.UpdateThread.daemon = True
-        #self.UpdateThread.start()
+        for i in range(15):
+            a = file.readline()
+            a = a.replace("\n","")
+            if str(a) == "True":
+                self.FormationDisplay.HideCol(i)
+        self.UpdateThread.start()
     def OnClose(self,event):
             print("")
             b = str(self.GetBackgroundColour())
