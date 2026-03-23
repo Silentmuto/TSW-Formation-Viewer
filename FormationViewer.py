@@ -132,6 +132,8 @@ class Vehicle:
     DType = 0
     CType = 0
     isBackwards = False
+    CHB = 0 #current handbrake value
+    FLA = 0 #flipped angle cocks
     def __init__(self,Vname,index):
         self.Name = Vname
         #print(Vname)
@@ -565,6 +567,30 @@ class Vehicle:
             request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributorCutOff.Function.GetCurrentNotchIndex?Subscription=42",headers = header)
         if self.DType == 5:
             request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/Distributor%20CutOff.ValvePosition?Subscription=42",headers = header)
+        if  self.Name == "Sdggmrss738":
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock.Function.GetCurrentOutputValue?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_B.Function.GetCurrentOutputValue?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_F.Function.IsAirHoseConnected?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_B.Function.IsAirHoseConnected?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Handbrake.Property.TertiaryValue?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/BrakePhysicsSimulation.Function.GetWheelTemperatureState?Subscription=42",headers = header)
+        elif self.Name == "Sggmrss":
+            print("here")
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_L.Function.GetCurrentOutputValue?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_R.Function.GetCurrentOutputValue?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_F.Function.IsAirHoseConnected?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_B.Function.IsAirHoseConnected?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Handbrake.Property.TertiaryValue?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/BrakePhysicsSimulation.Function.GetWheelTemperatureState?Subscription=42",headers = header)
+        else:
+            print("idk")
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_F.Function.GetCurrentOutputValue?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_B.Function.GetCurrentOutputValue?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_F.Function.IsAirHoseConnected?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_B.Function.IsAirHoseConnected?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Handbrake.Property.TertiaryValue?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/BrakePhysicsSimulation.Function.GetWheelTemperatureState?Subscription=42",headers = header)
+            
     def GetBrakeEditor(self):
         if self.BTT == 0:
             return 4
@@ -1331,6 +1357,84 @@ class Vehicle:
                 request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler.Function.PerformManualCouple",headers = header)
             else:
                 request.get(tswapi + "/get/CurrentFormation/" + str(self.index) + "/Coupler.Function.PerformManualUncouple",headers = header)     
+    def ChangeAngleCock(self,position,side):
+        print(f"Values are {position} and {side}")
+        if self.Name == "Sggmrss":
+            if self.FLA:
+                if side:
+                    side = 0
+                else:
+                    side = 1
+            if side == 1: #L
+                if  position == "[Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_L.InputValue?Value=1",headers = header)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_L.InputValue?Value=1",headers = header).url)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_L.InputValue?Value=1",headers = header).json())
+                if position == "[Partially Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_L.InputValue?Value=0.5",headers = header)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_L.InputValue?Value=0.5",headers = header).url)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_L.InputValue?Value=0.5",headers = header).json())
+                if position == "[Closed]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_L.InputValue?Value=0",headers = header)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "AngleCock_L.InputValue?Value=0",headers = header).url)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "AngleCock_L.InputValue?Value=0",headers = header).json())
+            if side == 0: #R
+                if  position == "[Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_R.InputValue?Value=1",headers = header)
+                if position == "[Partially Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_R.InputValue?Value=0.5",headers = header)
+                if position == "[Closed]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_R.InputValue?Value=0",headers = header)
+        elif self.name == "Sdggmrss738":
+            if side == 1:
+                if  position == "[Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock.InputValue?Value=1",headers = header)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock.InputValue?Value=1",headers = header).url)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock.InputValue?Value=1",headers = header).json())
+                if position == "[Partially Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock.InputValue?Value=0.5",headers = header)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock.InputValue?Value=0.5",headers = header).url)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock.InputValue?Value=0.5",headers = header).json())
+                if position == "[Closed]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock.InputValue?Value=0",headers = header)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "AngleCock.InputValue?Value=0",headers = header).url)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "AngleCock.InputValue?Value=0",headers = header).json())
+        else:
+            if side == 1:
+                if  position == "[Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_F.InputValue?Value=1",headers = header)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_F.InputValue?Value=1",headers = header).url)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_F.InputValue?Value=1",headers = header).json())
+                if position == "[Partially Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_F.InputValue?Value=0.5",headers = header)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_F.InputValue?Value=0.5",headers = header).url)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_F.InputValue?Value=0.5",headers = header).json())
+                if position == "[Closed]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_F.InputValue?Value=0",headers = header)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "AngleCock_F.InputValue?Value=0",headers = header).url)
+                    print(request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "AngleCock_F.InputValue?Value=0",headers = header).json())
+            if side == 0:
+                if  position == "[Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_B.InputValue?Value=1",headers = header)
+                if position == "[Partially Open]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_B.InputValue?Value=0.5",headers = header)
+                if position == "[Closed]":
+                    request.patch(tswapi + "/set/CurrentFormation/" + str(self.index) + "/AngleCock_B.InputValue?Value=0",headers = header)
+    def ChangeHandbrake(self,targetvalue):
+        targetvalue = targetvalue.replace("[","")
+        targetvalue = targetvalue.replace("]","")
+        targetvalue = int(targetvalue)
+        cv = int(self.CHB)
+        if targetvalue > cv:
+            for i in range(int(cv),targetvalue*5):
+                print(f"doing i = {i} iteration")
+                request.patch(tswapi+ "/set/CurrentFormation/" + str(self.index) + "/Handbrake.InputValue?Value=1000" ,headers = header)
+                time.sleep(0.5)
+        else:
+            for i in range(0,(cv-targetvalue)*5):
+                print(f"doing i = {i} iteration")
+                request.patch(tswapi+ "/set/CurrentFormation/" + str(self.index) + "/Handbrake.InputValue?Value=-1000" ,headers = header)
+                time.sleep(0.5)
 
 def FindData(index):
     BTT = 0
@@ -2129,11 +2233,14 @@ class MainWindowClass(wx.Frame):
     def OnCellClick(self,event):
         Col = event.GetCol()
         Row = event.GetRow()
-        if Col > 7:
-            if Col == 8:
-                self.FormationList[Row].ChangeCoupling(1,1)
-            if Col == 9:
-                self.FormationList[Row].ChangeCoupling(0,0)
+        if Col > 7 :
+            if Col < 10:
+                if Col == 8:
+                    self.FormationList[Row].ChangeCoupling(1,1)
+                if Col == 9:
+                    self.FormationList[Row].ChangeCoupling(0,0)
+            else:
+                event.Skip()
         else:
             event.Skip()
     def UpdateTheme(self,TXT,BKG,GLC,fromFile = 0):
@@ -2174,6 +2281,13 @@ class MainWindowClass(wx.Frame):
                     self.FormationList[Row].SetBM(Value)
                 if Col == 7:
                     self.FormationList[Row].SetDistrib(Value)
+                if Col == 10:
+                    self.FormationList[Row].ChangeAngleCock(Value,1)
+                if Col == 11:
+                    self.FormationList[Row].ChangeAngleCock(Value,0)
+                if Col == 14:
+                    self.hbthread = threading.Thread(target = self.FormationList[Row].ChangeHandbrake,args = [Value])
+                    self.hbthread.start()
 
     def OnEraseBackground(self, event):
         pass 
@@ -2219,17 +2333,23 @@ class MainWindowClass(wx.Frame):
         Dstr  = "N/A"
         
         HasDoubleBrake = 0
-        while i < self.FormationDisplay.GetNumberRows()*6:
+        while i < self.FormationDisplay.GetNumberRows()*12:
             BP = -1
             BC = -1
             BI = -1
             DI = -1
+            FAC = -1 #front angle cock
+            RAC = -1 # rear angle cock
+            FAH = -1 #front air hose
+            RAH = -1 #rear air hose
+            HBK = -1 #handbrake
+            BrakeState = -1 #brake temp state
             BPstr = "N/A"
             BCstr = "N/A"
             BMstr = "N/A"
             Dstr  = "N/A"
             HasDoubleBrake = 0
-            Vidx = int(i/6) #vehicle index, divided by 6 because there are 6 entries(7 for BTT = 7/ BTT =420) for each vehicle
+            Vidx = int(i/12) #vehicle index, divided by 6 because there are 6 entries(7 for BTT = 7/ BTT =420) for each vehicle
             #getting values
             if not PU: #BAR Pressure
                 if not str(UpdateData['Entries'][i]['Values']) == "None":
@@ -2269,7 +2389,29 @@ class MainWindowClass(wx.Frame):
                         DI = UpdateData['Entries'][i+5]['Values']['ValvePosition']
                         Dstr = self.FormationList[Vidx].GetDstr(DI)
 
-
+            if not str(UpdateData['Entries'][i+6]['Values']) == "None":
+                FAC = UpdateData['Entries'][i+6]['Values']['ReturnValue']
+            
+            if not str(UpdateData['Entries'][i+7]['Values']) == "None":
+                RAC = UpdateData['Entries'][i+7]['Values']['ReturnValue']
+            if not str(UpdateData['Entries'][i+8]['Values']) == "None":
+                tval = UpdateData['Entries'][i+8]['Values']['ReturnValue']
+                if tval:
+                    FAH = 1
+                else:
+                    FAH = 0
+            if not str(UpdateData['Entries'][i+9]['Values']) == "None":
+                tval = UpdateData['Entries'][i+9]['Values']['ReturnValue']
+                if tval:
+                    RAH = 1
+                else:
+                    RAH = 0
+            if not str(UpdateData['Entries'][i+10]['Values']) == "None":
+                HBK = round(UpdateData['Entries'][i+10]['Values']['Value'],2)
+                HBK = HBK * 100
+            if not str(UpdateData['Entries'][i+11]['Values']) == "None":
+                axlelist = [UpdateData['Entries'][i+11]['Values']['Axle_1'], UpdateData['Entries'][i+11]['Values']['Axle_2']]
+                BrakeState = max(axlelist)
             #updating the grid
             self.FormationDisplay.SetCellValue(Vidx,0,self.FormationList[Vidx].Name)
             self.FormationDisplay.SetCellValue(Vidx,1,BMstr) 
@@ -2279,7 +2421,94 @@ class MainWindowClass(wx.Frame):
                 self.FormationDisplay.SetCellValue(Vidx,6,BMstr)
             if not self.FormationDisplay.GetCellValue(Vidx,6) == Dstr:
                 self.FormationDisplay.SetCellValue(Vidx,7,Dstr)
-            i = i+6 # move to the next vehicle
+            if not self.FormationList[Vidx].Name == "Sggmrss":
+                if FAC == 1:
+                    self.FormationDisplay.SetCellValue(Vidx,10,"Open")
+                elif FAC == 0:
+                    self.FormationDisplay.SetCellValue(Vidx,10,"Closed")
+                elif not FAC == -1:
+                    self.FormationDisplay.SetCellValue(Vidx,10,"Partially Open")
+                else:
+                    self.FormationDisplay.SetCellValue(Vidx,10,"N/A")
+                
+                if RAC == 1:
+                    self.FormationDisplay.SetCellValue(Vidx,11,"Open")
+                elif RAC == 0:
+                    self.FormationDisplay.SetCellValue(Vidx,11,"Closed")
+                elif not RAC == -1:
+                    self.FormationDisplay.SetCellValue(Vidx,11,"Partially Open")
+                else:
+                    self.FormationDisplay.SetCellValue(Vidx,11,"N/A")
+            else:
+                if RAC == 1:
+                    if FAC == 0:
+                        self.FormationList[Vidx].FLA = 1
+                        self.FormationDisplay.SetCellValue(Vidx,10,"Open")
+                        self.FormationDisplay.SetCellValue(Vidx,11,"Closed")
+                    else:
+                        if FAC == 1:
+                            self.FormationDisplay.SetCellValue(Vidx,10,"Open")
+                        elif FAC == 0:
+                            self.FormationDisplay.SetCellValue(Vidx,10,"Closed")
+                        elif not FAC == -1:
+                            self.FormationDisplay.SetCellValue(Vidx,10,"Partially Open")
+                        else:
+                            self.FormationDisplay.SetCellValue(Vidx,10,"N/A")
+                        
+                        if RAC == 1:
+                            self.FormationDisplay.SetCellValue(Vidx,11,"Open")
+                        elif RAC == 0:
+                            self.FormationDisplay.SetCellValue(Vidx,11,"Closed")
+                        elif not RAC == -1:
+                            self.FormationDisplay.SetCellValue(Vidx,11,"Partially Open")
+                        else:
+                            self.FormationDisplay.SetCellValue(Vidx,11,"N/A")
+                else:
+                        if FAC == 1:
+                            self.FormationDisplay.SetCellValue(Vidx,10,"Open")
+                        elif FAC == 0:
+                            self.FormationDisplay.SetCellValue(Vidx,10,"Closed")
+                        elif not FAC == -1:
+                            self.FormationDisplay.SetCellValue(Vidx,10,"Partially Open")
+                        else:
+                            self.FormationDisplay.SetCellValue(Vidx,10,"N/A")
+                        
+                        if RAC == 1:
+                            self.FormationDisplay.SetCellValue(Vidx,11,"Open")
+                        elif RAC == 0:
+                            self.FormationDisplay.SetCellValue(Vidx,11,"Closed")
+                        elif not RAC == -1:
+                            self.FormationDisplay.SetCellValue(Vidx,11,"Partially Open")
+                        else:
+                            self.FormationDisplay.SetCellValue(Vidx,11,"N/A")
+                        
+            if FAH == 1:
+                self.FormationDisplay.SetCellValue(Vidx,12,"Connected")
+            elif FAH == 0:
+                self.FormationDisplay.SetCellValue(Vidx,12,"Disconnected")
+            else:
+                self.FormationDisplay.SetCellValue(Vidx,12,"N/A")
+            if RAH == 1:
+                self.FormationDisplay.SetCellValue(Vidx,13,"Connected")
+            elif RAH == 0:
+                self.FormationDisplay.SetCellValue(Vidx,13,"Disconnected")
+            else:
+                self.FormationDisplay.SetCellValue(Vidx,13,"N/A")
+            if not HBK == -1:
+                self.FormationList[Vidx].CHB = HBK
+                self.FormationDisplay.SetCellValue(Vidx,14,str(HBK))
+            else:
+                self.FormationDisplay.SetCellValue(Vidx,14,"N/A")
+            if not BrakeState == -1:
+                if BrakeState == 0:
+                    self.FormationDisplay.SetCellValue(Vidx,15,"Cold")
+                if BrakeState == 1:
+                    self.FormationDisplay.SetCellValue(Vidx,15,"Warm")
+                if BrakeState == 2:
+                    self.FormationDisplay.SetCellValue(Vidx,15,"Hot")
+            else:
+                self.FormationDisplay.SetCellValue(Vidx,15,"N/A")
+            i = i+12 # move to the next vehicle
                     
     def ClearList(self):
         print("Clearing...")

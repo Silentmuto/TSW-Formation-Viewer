@@ -40,7 +40,7 @@ def GetCouplerEditor():
     CoupleEditor = wx.grid.GridCellChoiceEditor(["Couple","Uncouple"])
     return CoupleEditor
 def GetAngleCockEditor():
-    AnglecockEditor = wx.grid.GridCellChoiceEditor(["Open", "Partially Open", "Closed"])
+    AnglecockEditor = wx.grid.GridCellChoiceEditor(["Open", "Partially Open", "Closed","N/A"])
     return AnglecockEditor
 def GetButtonRenderer(type):
     if type == 0:
