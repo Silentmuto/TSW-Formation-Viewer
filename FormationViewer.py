@@ -18,7 +18,7 @@ import wx.grid
 #750 = Simulation/BrakePipe Simulation/BC_1
 PU = 0
 tswapi = "http://127.0.0.1:31270"   
-
+subid = 42
 now = datetime.now()
 
 #searching for the key
@@ -466,130 +466,130 @@ class Vehicle:
     def SetSubs(self):
         #Setting subs for BP  pressure
         if self.BPT == 0:
-                request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBPFound1?Subscription=42", headers = header)
-                request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBPFound2?Subscription=42", headers = header)
+                request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBPFound1?Subscription=" + str(subid), headers = header)
+                request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBPFound2?Subscription=" + str(subid), headers = header)
         if self.BPT == 1:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/AirPipe (BP)." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/AirPipe (BP)." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/AirPipe (BP)." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/AirPipe (BP)." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BPT == 2:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BP (AirPipe)." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BP (AirPipe)." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BP (AirPipe)." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BP (AirPipe)." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BPT == 3:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/HL." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/HL." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/HL." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/HL." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BPT == 4:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakePipe." + RVData.PressureUnit[0] +"?Subscription=42", headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakePipe." + RVData.PressureUnit[1] +"?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakePipe." + RVData.PressureUnit[0] +"?Subscription=" + str(subid), headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakePipe." + RVData.PressureUnit[1] +"?Subscription=" + str(subid), headers = header)
         #subs for BC pressure
 
         if self.BCT == 0:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND1?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND@?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND1?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/NOBCFOUND@?Subscription=" + str(subid), headers = header)
         if self.BCT == 1:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BCT == 2:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_1." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_1." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_1." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_1." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BCT == 3:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder2." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder2." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder2." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder2." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BCT == 4:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_1_2." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_1_2." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_1_2." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_1_2." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BCT == 5:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/Brake Cylinder Volume A." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/Brake Cylinder Volume A." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/Brake Cylinder Volume A." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/Brake Cylinder Volume A." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BCT == 6:
-                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation//Bremszylinder1." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation//Bremszylinder1." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation//Bremszylinder1." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation//Bremszylinder1." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BCT == 7:
-                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_2." + RVData.PressureUnit[0]+ "?Subscription=42", headers = header)
-                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_2." + RVData.PressureUnit[1]+ "?Subscription=42", headers = header)
+                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_2." + RVData.PressureUnit[0]+ "?Subscription=" + str(subid), headers = header)
+                request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BrakeCylinder_2." + RVData.PressureUnit[1]+ "?Subscription=" + str(subid), headers = header)
         if self.BCT == 8:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BC_1." + RVData.PressureUnit[0] +"?Subscription=42", headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BC_1." + RVData.PressureUnit[1] +"?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BC_1." + RVData.PressureUnit[0] +"?Subscription=" + str(subid), headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/Simulation/BC_1." + RVData.PressureUnit[1] +"?Subscription=" + str(subid), headers = header)
         if self.BCT == 9:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/BC_11_Complementary." + RVData.PressureUnit[0] + "?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/BC_11_Complementary." + RVData.PressureUnit[1] + "?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/BC_11_Complementary." + RVData.PressureUnit[0] + "?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/BC_11_Complementary." + RVData.PressureUnit[1] + "?Subscription=" + str(subid),headers = header)
         #subs for BTT
         if self.BTT == 0:
             self.BrakeType = "[?]"
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBSW?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBSW?Subscription=" + str(subid), headers = header)
         if self.BTT == -1:
             self.BrakeType = "[?]"
             #print("no switch")
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBSW?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NOBSW?Subscription=" + str(subid), headers = header)
         if self.BTT == 1:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 2:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/PassengerGoodsValve.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/PassengerGoodsValve.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 3:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeSelector.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 4:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeMode_Switch.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeMode_Switch.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 5:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeMode.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeMode.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 6:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeModeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeModeSelector.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 7:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Bogie1PassGoodsValve (Lever).Function.GetCurrentNotchIndex?Subscription=42", headers = header)
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Bogie2PassGoodsValve (Lever).Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Bogie1PassGoodsValve (Lever).Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/Bogie2PassGoodsValve (Lever).Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 8:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeSelector_F.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeSelector_F.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 9:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeModeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeModeSelector.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 10:
-            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeMode_F.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi+ "/subscription/CurrentFormation/" + str(self.index) + "/BrakeMode_F.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 11:
-            request.post(tswapi + "/subscription/CurrentFormation/"+ str(self.index) + "/BrakeSelector_L.Function.GetCurrentNotchIndex?Subscription=42", headers = header).json() 
+            request.post(tswapi + "/subscription/CurrentFormation/"+ str(self.index) + "/BrakeSelector_L.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header).json() 
         if self.BTT == 12:
-            request.post(tswapi + "/subscription/CurrentFormation/" +  str(self.index) + "/GPR_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header).json()
+            request.post(tswapi + "/subscription/CurrentFormation/" +  str(self.index) + "/GPR_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header).json()
         if self.BTT == 13:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/BrakeSelector_R-MG.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/BrakeSelector_R-MG.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 14:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/GP_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/GP_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 15:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/BrakeTimingSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/BrakeTimingSelector.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.BTT == 420:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_L.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_R.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_L.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/G%2fP_BrakeSelector_R.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         TestData = request.get(tswapi + "/list/CurrentFormation/" + str(self.index)+ "/DistributerCutOff/",headers = header).json()
         if self.DType == 1:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributerCutOff.Function.GetCurrentNotchIndex?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributerCutOff.Function.GetCurrentNotchIndex?Subscription=" + str(subid),headers = header)
         if self.DType == 2:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/DistributerCutOut.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/DistributerCutOut.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
         if self.DType == 3:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributorIsolatingValve.Function.GetCurrentNotchIndex?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributorIsolatingValve.Function.GetCurrentNotchIndex?Subscription=" + str(subid),headers = header)
         if self.DType == 0:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NODistributor?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) + "/NODistributor?Subscription=" + str(subid),headers = header)
         if self.DType == 4:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributorCutOff.Function.GetCurrentNotchIndex?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index)+ "/DistributorCutOff.Function.GetCurrentNotchIndex?Subscription=" + str(subid),headers = header)
         if self.DType == 5:
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/Distributor%20CutOff.ValvePosition?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Simulation/Distributor%20CutOff.ValvePosition?Subscription=" + str(subid),headers = header)
         if  self.Name == "Sdggmrss738":
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock.Function.GetCurrentOutputValue?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_B.Function.GetCurrentOutputValue?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_F.Function.IsAirHoseConnected?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_B.Function.IsAirHoseConnected?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Handbrake.Property.TertiaryValue?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/BrakePhysicsSimulation.Function.GetWheelTemperatureState?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock.Function.GetCurrentOutputValue?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_B.Function.GetCurrentOutputValue?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_F.Function.IsAirHoseConnected?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_B.Function.IsAirHoseConnected?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Handbrake.Property.TertiaryValue?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/BrakePhysicsSimulation.Function.GetWheelTemperatureState?Subscription=" + str(subid),headers = header)
         elif self.Name == "Sggmrss":
             print("here")
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_L.Function.GetCurrentOutputValue?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_R.Function.GetCurrentOutputValue?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_F.Function.IsAirHoseConnected?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_B.Function.IsAirHoseConnected?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Handbrake.Property.TertiaryValue?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/BrakePhysicsSimulation.Function.GetWheelTemperatureState?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_L.Function.GetCurrentOutputValue?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_R.Function.GetCurrentOutputValue?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_F.Function.IsAirHoseConnected?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_BP_B.Function.IsAirHoseConnected?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Handbrake.Property.TertiaryValue?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/BrakePhysicsSimulation.Function.GetWheelTemperatureState?Subscription=" + str(subid),headers = header)
         else:
             print("idk")
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_F.Function.GetCurrentOutputValue?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_B.Function.GetCurrentOutputValue?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_F.Function.IsAirHoseConnected?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_B.Function.IsAirHoseConnected?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Handbrake.Property.TertiaryValue?Subscription=42",headers = header)
-            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/BrakePhysicsSimulation.Function.GetWheelTemperatureState?Subscription=42",headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_F.Function.GetCurrentOutputValue?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AngleCock_B.Function.GetCurrentOutputValue?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_F.Function.IsAirHoseConnected?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/AirHose_B.Function.IsAirHoseConnected?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/Handbrake.Property.TertiaryValue?Subscription=" + str(subid),headers = header)
+            request.post(tswapi + "/subscription/CurrentFormation/" + str(self.index) +"/BrakePhysicsSimulation.Function.GetWheelTemperatureState?Subscription=" + str(subid),headers = header)
             
     def GetBrakeEditor(self):
         if self.BTT == 0:
@@ -1569,7 +1569,7 @@ def FindData(index):
                                                         ReqData = request.get(tswapi + "/get/CurrentFormation/" + str(index) + "/GP_BrakeSelector.Function.GetCurrentNotchIndex", headers = header).json()
                                                         if not ReqData['Result'] == "Error":
                                                             BTT = 14
-                                                            request.post(tswapi + "/subscription/CurrentFormation/" + str(index) + "/GP_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=42", headers = header)
+                                                            request.post(tswapi + "/subscription/CurrentFormation/" + str(index) + "/GP_BrakeSelector.Function.GetCurrentNotchIndex?Subscription=" + str(subid), headers = header)
                                                         else:
                                                             
                                                             if not ReqData['Result'] == "Error":
@@ -1673,7 +1673,8 @@ class ColumnDialog(wx.Dialog):
         self.ColumnTog13 = wx.CheckBox(self,ID.ToggleColumnID+12,"Front Gladhand")
         self.ColumnTog14 = wx.CheckBox(self,ID.ToggleColumnID+13,"Rear GladHand")
         self.ColumnTog15 = wx.CheckBox(self,ID.ToggleColumnID+14,"Handbrake")
-        self.ColumnLab= wx.CheckBox(self,ID.ToggleColumnID+15, "Column Labels(Titles)")
+        self.ColumnTog16 = wx.CheckBox(self,ID.ToggleColumnID+15,"Brake Heat")
+        self.ColumnLab= wx.CheckBox(self,ID.ToggleColumnID+16, "Column Labels(Titles)")
         self.ColumnSizer.Add(self.ColumnTog1,0)
         self.ColumnSizer.Add(self.ColumnTog2,0)
         self.ColumnSizer.Add(self.ColumnTog3,0)
@@ -1689,6 +1690,7 @@ class ColumnDialog(wx.Dialog):
         self.ColumnSizer.Add(self.ColumnTog13,0)
         self.ColumnSizer.Add(self.ColumnTog14,0)
         self.ColumnSizer.Add(self.ColumnTog15,0)
+        self.ColumnSizer.Add(self.ColumnTog16,0)
         self.ColumnSizer.Add(self.ColumnLab,1,wx.LEFT)
         self.SetSizer(self.ColumnSizer)
         self.ColumnSizer.Layout()
@@ -1722,6 +1724,8 @@ class ColumnDialog(wx.Dialog):
             self.ColumnTog14.SetValue(1) 
         if not MainWindow.FormationDisplay.IsColShown(14):
             self.ColumnTog15.SetValue(1)
+        if not MainWindow.FormationDisplay.IsColShown(15):
+            self.ColumnTog16.SetValue(1)
         self.Show()
         self.Center()
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn1,id = ID.ToggleColumnID)
@@ -1739,7 +1743,8 @@ class ColumnDialog(wx.Dialog):
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn13,id = ID.ToggleColumnID+12)
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn14,id = ID.ToggleColumnID+13)
         self.Bind(wx.EVT_CHECKBOX,self.OnColumn15,id = ID.ToggleColumnID+14)
-        self.Bind(wx.EVT_CHECKBOX,self.OnColumnLab,id = ID.ToggleColumnID + 15)
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumn16,id = ID.ToggleColumnID+15)
+        self.Bind(wx.EVT_CHECKBOX,self.OnColumnLab,id = ID.ToggleColumnID + 16)
         self.Bind(wx.EVT_CLOSE,self.OnClose,source = self)
     def OnClose(self,event):
         file = open("columns.ini","w")
@@ -1772,6 +1777,8 @@ class ColumnDialog(wx.Dialog):
         file.write(str(self.ColumnTog14.IsChecked()))
         file.write("\n")
         file.write(str(self.ColumnTog15.IsChecked()))
+        file.write("\n")
+        file.write(str(self.ColumnTog16.IsChecked()))
         file.write("\n")
         file.close()
         event.Skip()
@@ -1859,6 +1866,11 @@ class ColumnDialog(wx.Dialog):
             MainWindow.FormationDisplay.HideCol(14)
         else:
             MainWindow.FormationDisplay.ShowCol(14)
+    def OnColumn16(self,event):
+        if MainWindow.FormationDisplay.IsColShown(15):
+            MainWindow.FormationDisplay.HideCol(15)
+        else:
+            MainWindow.FormationDisplay.ShowCol(15)
 class MainWindowClass(wx.Frame):
     FormationList = []
     SkipCurrent = 0
@@ -1896,6 +1908,7 @@ class MainWindowClass(wx.Frame):
         self.WindowSizer = wx.BoxSizer()
         self.WindowSizer.Add(self.MainPanel,1,wx.EXPAND)
         self.MainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.SecondRowSizer = wx.BoxSizer()
         LogFile.write("Frame + sizers Initialized \n")
         LogFile.flush() 
         self.FormationDisplay = VG.VehicleGrid(self.MainPanel)
@@ -1905,27 +1918,36 @@ class MainWindowClass(wx.Frame):
         self.ToggleAllButton = buttons.GenButton(self.MainPanel,ID.ToggleAllID,"Toggle All Wagons")
         self.ToggleColumnButton = buttons.GenButton(self.MainPanel,ID.ToggleColumnButtonID,"Column Toggle")
         self.RefreshButton = buttons.GenButton(self.MainPanel,ID.RefreshButtonID,"Refresh")
+        self.WheelButton = buttons.GenButton(self.MainPanel,ID.WheelButtonID,"Hit Wheels")
         self.ThemeChoice = wx.Choice(self.MainPanel,ID.ThemeChoiceID,choices = ["Night Moss", "Flora", "Black", "Blue","Custom"] )
         self.ThemeChoice.SetSelection(0)
         
         self.PressureUnitChoice.SetSelection(0)
         self.ButtonSizer = wx.BoxSizer()
         self.MainSizer.Add(self.FormationDisplay,1,wx.EXPAND)
-        self.ButtonSizer.Add(self.OnTopToggle,0,wx.LEFT,10)
-        self.ButtonSizer.Add(self.PressureUnitChoice,0,wx.LEFT,10)
+        self.ButtonSizer.Add(self.OnTopToggle,0,wx.LEFT | wx.ALIGN_CENTER_VERTICAL ,11)
+        self.ButtonSizer.Add(self.PressureUnitChoice,0,wx.LEFT | wx.ALIGN_CENTER_VERTICAL,10)
         self.ButtonSizer.Add(self.Toggle5Button,0,wx.LEFT,10)
         self.ButtonSizer.Add(self.ToggleAllButton,0,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ThemeChoice,0,wx.LEFT,10)
-        self.ButtonSizer.Add(self.ToggleColumnButton,0,wx.LEFT,10)
-        self.ButtonSizer.Add(self.RefreshButton,0,wx.LEFT,10)
+        
+        self.SecondRowSizer.Add(self.ToggleColumnButton,0,wx.LEFT,10)
+        self.SecondRowSizer.Add(self.RefreshButton,0,wx.LEFT,10)
+        self.SecondRowSizer.Add(self.WheelButton,0,wx.LEFT,10)
+        self.SecondRowSizer.Add(self.ThemeChoice,0,wx.LEFT| wx.ALIGN_CENTER_VERTICAL,10)
         self.MainSizer.Add(self.ButtonSizer,0,wx.TOP,5)
+        self.MainSizer.Add(self.SecondRowSizer,0,wx.TOP,5)
+        
 
 
+        self.MainBar = wx.MenuBar();
+        self.OptionsMenu = wx.Menu("Options")
+        self.OptionsMenu.AppendCheckItem(ID.ExpertControlsID,"Toggle Expert Controls")
+        #self.OptionsMenu.Append(ID.SubsItemID,"Subscription ID")
+        self.HelpMenu = wx.Menu("Help")
+        self.MainBar.Append(self.OptionsMenu,"Options")
+        #self.MainBar.Append(self.HelpMenu,"Help")
 
-        #self.OptionsBar = wx.MenuBar();
-        #self.OptionsMenu = wx.Menu("Options")
-        #self.OptionsBar.Append(self.OptionsMenu,"Options")
-        #self.SetMenuBar(self.OptionsBar)        
+        self.SetMenuBar(self.MainBar)        
         self.SetStatusBar(self.PBar)
 
         self.MainPanel.SetSizer(self.MainSizer)
@@ -1942,6 +1964,12 @@ class MainWindowClass(wx.Frame):
         self.SetForegroundColour(self.TextColourC)
         self.ToggleAllButton.SetBackgroundColour(self.BackgroundColourC)
         self.ToggleAllButton.SetForegroundColour(self.TextColourC)
+        self.RefreshButton.SetBackgroundColour(self.BackgroundColourC)
+        self.RefreshButton.SetForegroundColour(self.TextColourC)
+        self.ToggleColumnButton.SetBackgroundColour(self.BackgroundColourC)
+        self.ToggleColumnButton.SetForegroundColour(self.TextColourC)
+        self.WheelButton.SetBackgroundColour(self.BackgroundColourC)
+        self.WheelButton.SetForegroundColour(self.TextColourC)
         self.FormationDisplay.SetBackgroundColour(self.BackgroundColourC)
         self.FormationDisplay.SetForegroundColour(self.TextColourC)
         self.FormationDisplay.SetLabelBackgroundColour(self.BackgroundColourC)
@@ -1986,7 +2014,7 @@ class MainWindowClass(wx.Frame):
         self.Show(True)
         self.Center()
         if IsTSWOpen():
-            requests.delete(tswapi + "/subscription/?Subscription=42", headers = header)
+            requests.delete(tswapi + "/subscription/?Subscription=" + str(subid), headers = header)
             ReqData = request.get(tswapi + "/list/CurrentFormation", headers = header).json()
             if ReqData['Result'] == "Error":
                 self.statustext.SetLabel("Waiting for formation")
@@ -2172,14 +2200,37 @@ class MainWindowClass(wx.Frame):
         self.Bind(wx.EVT_BUTTON,self.OnColumnToggle, id= ID.ToggleColumnButtonID)
         self.Bind(wx.EVT_BUTTON,self.OnRefreshButton,id = ID.RefreshButtonID)
         self.Bind(wx.EVT_CLOSE,self.OnClose, source = self)
+        self.Bind(wx.EVT_BUTTON,self.OnWheel, source =self.WheelButton)
+        self.Bind(wx.EVT_MENU,self.OnExpertToggle,id = ID.ExpertControlsID)
         self.UpdateThread = threading.Thread(target=self.RequestUpdate)
         self.UpdateThread.daemon = True
-        for i in range(15):
+        for i in range(16):
             a = file.readline()
             a = a.replace("\n","")
             if str(a) == "True":
                 self.FormationDisplay.HideCol(i)
         self.UpdateThread.start()
+    def OnExpertToggle(self,event):
+        if self.OptionsMenu.IsChecked(ID.ExpertControlsID):
+            self.FormationDisplay.HideCol(10)
+            self.FormationDisplay.HideCol(11)
+            self.FormationDisplay.HideCol(12)
+            self.FormationDisplay.HideCol(13)
+            self.FormationDisplay.HideCol(14)
+            self.FormationDisplay.HideCol(15)
+            self.SecondRowSizer.Show(self.WheelButton,False)
+            self.SecondRowSizer.Layout()
+            self.Refresh()
+        else:
+            self.FormationDisplay.ShowCol(10)
+            self.FormationDisplay.ShowCol(11)
+            self.FormationDisplay.ShowCol(12)
+            self.FormationDisplay.ShowCol(13)
+            self.FormationDisplay.ShowCol(14)
+            self.FormationDisplay.ShowCol(15)
+            self.SecondRowSizer.Show(self.WheelButton,True)
+            self.SecondRowSizer.Layout()
+            self.Refresh()
     def OnClose(self,event):
             print("")
             b = str(self.GetBackgroundColour())
@@ -2229,6 +2280,27 @@ class MainWindowClass(wx.Frame):
         self.UpdateTheme(self.TextColourC,self.BackgroundColourC,self.GridLineColourC)
     def OnRefreshButton(self,event):
         self.RebuildFormation()
+    def OnWheel(self,event):
+        WheelThread = threading.Thread(target = self.HitDaWheel)
+        WheelThread.start()
+    def HitDaWheel(self):
+        for i in range(len(self.FormationList)):
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_1L.InputValue?Value=1",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_1R.InputValue?Value=1",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_2L.InputValue?Value=1",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_2R.InputValue?Value=1",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_3L.InputValue?Value=1",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_3R.InputValue?Value=1",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_4L.InputValue?Value=1",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_4R.InputValue?Value=1",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_1L.InputValue?Value=0",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_1R.InputValue?Value=0",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_2L.InputValue?Value=0",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_2R.InputValue?Value=0",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_3L.InputValue?Value=0",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_3R.InputValue?Value=0",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_4L.InputValue?Value=0",headers= header)
+            request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_4R.InputValue?Value=0",headers= header)
 
     def OnCellClick(self,event):
         Col = event.GetCol()
@@ -2524,7 +2596,8 @@ class MainWindowClass(wx.Frame):
         
 
         self.statustext.SetLabel("Waiting for Formation")
-    
+    def UpdateFunction(self):
+        self.RebuildFormation()
     def UpdateOptions(self):
         pass
     def RebuildFormation(self):
@@ -2534,7 +2607,7 @@ class MainWindowClass(wx.Frame):
         self.ClearList()
         LogFile.write("Rebuilding Formation \n")
         LogFile.flush() # Add this line
-        requests.delete(tswapi + "/subscription/?Subscription=42", headers = header)
+        requests.delete(tswapi + "/subscription/?Subscription=" + str(subid), headers = header)
         self.statustext.SetLabel("Rebuilding Formation")
         self.Freeze()
 
@@ -2722,7 +2795,7 @@ class MainWindowClass(wx.Frame):
      UpdateData = 0
      Vh = 0
      SkipToRebuild = 0
-
+     
      while 1:
             res = IsTSWOpen()
             if res:
@@ -2754,7 +2827,7 @@ class MainWindowClass(wx.Frame):
                         if Vh == self.VehCount :
                             if not SkipToRebuild:
                                 try:
-                                    UpdateData = request.get(tswapi + "/subscription?Subscription=42", headers = header).json()
+                                    UpdateData = request.get(tswapi + "/subscription?Subscription=" + str(subid), headers = header).json()
                                 except requests.exceptions.ConnectionError as e:
                                     time.sleep(1)
                             else:
@@ -2762,18 +2835,22 @@ class MainWindowClass(wx.Frame):
                                 Vh = 0
                                 LogFile.write("Formation Changed, Rebuilding... \n")
                                 LogFile.flush() 
-                                wx.CallAfter(self.RebuildFormation)
-                                time.sleep(1)
+                                if not self.Rebuilding:
+                                    donethread = threading.Thread(target =self.UpdateFunction)
+                                    donethread.start()
+                                    time.sleep(1)
                         else:
                             print("Formation Changed")
                             Vh = 0
                             LogFile.write("Formation Changed, Rebuilding... \n")
                             LogFile.flush() 
-                            wx.CallAfter(self.RebuildFormation)
-                            time.sleep(1)
+                            if not self.Rebuilding:
+                                donethread = threading.Thread(target = self.UpdateFunction)
+                                donethread.start()
+                                time.sleep(1)
                     else:
                         try :
-                            requests.delete(tswapi + "/subscription/?Subscription=42", headers = header).json()
+                            requests.delete(tswapi + "/subscription/?Subscription=" + str(subid), headers = header).json()
                         except requests.exceptions.ConnectionError as e:
                             print("error deleting subs")
                         VehCount = 0
@@ -2782,7 +2859,7 @@ class MainWindowClass(wx.Frame):
                         time.sleep(1)
                     if Vh:
                         if UpdateData:
-                 
+
                             wx.CallAfter(self.OnRefresh,UpdateData)
             else:
                 self.UpdateText("Waiting for TSW")

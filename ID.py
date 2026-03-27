@@ -8,4 +8,7 @@ ThemeChoiceID = 9
 ThemeWindowID = 10
 ToggleColumnButtonID = 11
 RefreshButtonID = 12
+WheelButtonID = 13
+ExpertControlsID = 14
+SubsItemID = 15
 ToggleColumnID = 100
