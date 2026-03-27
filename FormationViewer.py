@@ -1884,6 +1884,7 @@ class MainWindowClass(wx.Frame):
     HasGPRSwitch = 0
     LocoCount = 0
     DoubleBrakeSwitchCount = 0
+    FileOpened = 0
     AVH = 0
     def __init__(self, parent, title):
         LogFile.write("Initializing Frame \n")
@@ -2008,7 +2009,10 @@ class MainWindowClass(wx.Frame):
         self.SetSizer(self.WindowSizer)
         self.WindowSizer.Layout()
         #4self.FormationDisplay.AddVehicle(["test","g","0","0","100","0","4","0"],1)
-        file = open("columns.ini","r")
+        a = Path("columns.ini")
+        if a.exists():
+            self.FileOpened = 1
+            file = open("columns.ini","r")
 
         self.Refresh()
         self.Show(True)
@@ -2204,11 +2208,12 @@ class MainWindowClass(wx.Frame):
         self.Bind(wx.EVT_MENU,self.OnExpertToggle,id = ID.ExpertControlsID)
         self.UpdateThread = threading.Thread(target=self.RequestUpdate)
         self.UpdateThread.daemon = True
-        for i in range(16):
-            a = file.readline()
-            a = a.replace("\n","")
-            if str(a) == "True":
-                self.FormationDisplay.HideCol(i)
+        if self.FileOpened:
+            for i in range(16):
+                a = file.readline()
+                a = a.replace("\n","")
+                if str(a) == "True":
+                    self.FormationDisplay.HideCol(i)
         self.UpdateThread.start()
     def OnExpertToggle(self,event):
         if self.OptionsMenu.IsChecked(ID.ExpertControlsID):
@@ -2870,6 +2875,6 @@ class MainWindowClass(wx.Frame):
     
 
 
-app = wx.App(False,"ProgramOutput.log",)
-MainWindow = MainWindowClass(None, "Formation Viewer 1.2.1")
+app = wx.App(True,"ProgramOutput.log",)
+MainWindow = MainWindowClass(None, "Formation Viewer 1.3.0")
 app.MainLoop()
