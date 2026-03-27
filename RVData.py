@@ -520,5 +520,20 @@ VehicleData = {
         "isWagon": True,
         "DiType" : 1,
     },
-
+    "CD750": {
+        "Weight": 75,
+        "BTT": -1,
+        "BPT": 4,
+        "BCT": 8,
+        "isWagon": False,
+        "DiType": 0,
+    },
+    "CD843": {
+        "Weight": 56,
+        "BTT": -1,
+        "BPT": 4,
+        "BCT": 9,
+        "isWagon":False,
+        "DiType": 0,
+    },
     }

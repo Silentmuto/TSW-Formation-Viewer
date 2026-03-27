@@ -8,7 +8,7 @@ class VehicleGrid(G.Grid):
 		G.Grid.__init__(self,parent)
 		self.CreateGrid(0,0)
 		self.SetRowLabelSize(30)
-		self.AppendCols(10)
+		self.AppendCols(16)
 		self.EnableCellEditControl(False)
 		self.SetColLabelValue(0,"Name")
 		self.SetColLabelValue(1,"Brake Mode")
@@ -20,9 +20,26 @@ class VehicleGrid(G.Grid):
 		self.SetColLabelValue(7,"Distributor Switch")
 		self.SetColLabelValue(8,"Uncouple")
 		self.SetColLabelValue(9,"Couple")
+		self.SetColLabelValue(10,"Front AngleCock")
+		self.SetColLabelValue(11,"Rear AngleCock")
+		self.SetColLabelValue(12,"Front AirHose")
+		self.SetColLabelValue(13,"Rear AirHose")
+		self.SetColLabelValue(14,"Handbrake(%)")
+		self.SetColLabelValue(15,"Brake Heat")
+
 		self.SetColMinimalWidth(7,140)
+		self.SetColMinimalWidth(10,120)
+		self.SetColMinimalWidth(11,120)
+		self.SetColMinimalWidth(12,120)
+		self.SetColMinimalWidth(13,120)
+		self.SetColMinimalWidth(14,120)
 		self.SetColSize(7,140)
-	def AddVehicle(self,values): #name, brake mode, BP,BC,Weight,Load,brakeType,isdstr
+		self.SetColSize(10,120)
+		self.SetColSize(11,120)
+		self.SetColSize(12,120)
+		self.SetColSize(13,120)
+		self.SetColSize(14,120)
+	def AddVehicle(self,values,isexpert=1): #name, brake mode, BP,BC,Weight,Load,brakeType,isdstr
 		self.AppendRows(1)
 		CurrentRow = self.GetNumberRows()-1
 		self.SetCellValue(CurrentRow,0,values[0])  #SetCellValue (self, row, col, s) #name
@@ -47,6 +64,9 @@ class VehicleGrid(G.Grid):
 			self.SetCellEditor(CurrentRow,7,lib.GetNullChoiceEditor())
 		self.SetCellRenderer(CurrentRow,8,lib.GetButtonRenderer(0))
 		self.SetCellRenderer(CurrentRow,9,lib.GetButtonRenderer(1))
+		self.SetCellEditor(CurrentRow,10,lib.GetAngleCockEditor())
+		self.SetCellEditor(CurrentRow,11,lib.GetAngleCockEditor())
+		#self.SetCellEditor(CurrentRow,14,G.GridCellNumberEditor(0,100))
 		#SettingCells to ReadOnly
 		self.SetReadOnly(CurrentRow,0)
 		self.SetReadOnly(CurrentRow,1)
