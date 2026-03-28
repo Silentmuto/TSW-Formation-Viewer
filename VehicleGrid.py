@@ -1,7 +1,7 @@
 import wx
 import wx.grid as G
 import ChoiceEditors as lib
-import Vehicle
+import VehicleF
 
 class VehicleGrid(G.Grid):
 	def __init__(self,parent):
