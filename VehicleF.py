@@ -14,6 +14,8 @@ PU = 0
 def SetSubID(value):
     global subid
     subid = value
+    print("new value = ")
+    print(subid)
 
 def SetAPIKey(value):
     print("entered function")

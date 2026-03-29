@@ -85,8 +85,6 @@ def IsTSWOpen():
     return 0
 
 
-
-
 class ThemeWindow(wx.Dialog):
     def __init__(self,parent):
         wx.Dialog.__init__(self,None,-1)
@@ -432,6 +430,7 @@ class MainWindowClass(wx.Frame):
         self.OptionsMenu = wx.Menu("Options")
         self.OptionsMenu.AppendCheckItem(ID.ExpertControlsID,"Toggle Expert Controls")
         self.OptionsMenu.Append(ID.SubsItemID,"Subscription ID")
+        self.OptionsMenu.Append(ID.ControlDisplayID,"Display settings")
         self.HelpMenu = wx.Menu("Help")
         self.MainBar.Append(self.OptionsMenu,"Options")
         self.MainBar.Append(self.HelpMenu,"Help")
@@ -527,6 +526,8 @@ class MainWindowClass(wx.Frame):
         self.Bind(wx.EVT_CLOSE,self.OnClose, source = self)
         self.Bind(wx.EVT_BUTTON,self.OnWheel, source =self.WheelButton)
         self.Bind(wx.EVT_MENU,self.OnExpertToggle,id = ID.ExpertControlsID)
+        self.Bind(wx.EVT_MENU,self.OnSubChange,id = ID.SubsItemID)
+        self.Bind(wx.EVT_MENU,self.OnControlOption,id = ID.ControlDisplayID)
         self.UpdateThread = threading.Thread(target=self.RequestUpdate)
         self.UpdateThread.daemon = True
         if self.FileOpened:
@@ -583,6 +584,53 @@ class MainWindowClass(wx.Frame):
     def OnColumnToggle(self,event):
         col = ColumnDialog(self,7)
         col.Show()
+    def OnControlOption(self,event):
+        dialog = wx.MultiChoiceDialog(self,"Choose which controls to display","Control Display",["Pressure Choice","Toggle fist 5","Toggle all wagons","Column Toggle","Refresh","Hit Wheels","Theme Selection"])
+        sel = []
+        if self.PressureUnitChoice.IsShown():
+            sel.append(0)
+        if self.Toggle5Button.IsShown():
+            sel.append(1)
+        if self.ToggleAllButton.IsShown():
+            sel.append(2)
+        if self.ToggleColumnButton.IsShown():
+            sel.append(3)
+        if self.RefreshButton.IsShown():
+            sel.append(4)
+        if self.WheelButton.IsShown():
+            sel.append(5)
+        if self.ThemeChoice.IsShown():
+            sel.append(6)
+        dialog.SetSelections(sel)
+        if dialog.ShowModal() == wx.ID_OK:
+            Choices = dialog.GetSelections()
+            self.PressureUnitChoice.Hide()
+            self.Toggle5Button.Hide()
+            self.ToggleAllButton.Hide()
+            self.ToggleColumnButton.Hide()
+            self.RefreshButton.Hide()
+            self.WheelButton.Hide()
+            self.ThemeChoice.Hide()
+            for i in range(len(Choices)):
+                if Choices[i] == 0:
+                    self.PressureUnitChoice.Show()
+                if Choices[i] == 1:
+                    self.Toggle5Button.Show()
+                if Choices[i] == 2:
+                    self.ToggleAllButton.Show()
+                if Choices[i] == 3:
+                    self.ToggleColumnButton.Show()
+                if Choices[i] == 4:
+                    self.RefreshButton.Show()
+                if Choices[i] == 5:
+                    self.WheelButton.Show()
+                if Choices[i] == 6:
+                    self.ThemeChoice.Show()
+        self.MainSizer.Layout()
+        self.ButtonSizer.Layout()
+        self.SecondRowSizer.Layout()
+        self.WindowSizer.Layout()
+
     def OnThemeChange(self,event):
         if event.GetSelection() == 0:
             self.BackgroundColourC = [51,51,51]
@@ -627,6 +675,12 @@ class MainWindowClass(wx.Frame):
             request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_3R.InputValue?Value=0",headers= header)
             request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_4L.InputValue?Value=0",headers= header)
             request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_4R.InputValue?Value=0",headers= header)
+    def OnSubChange(self,event):
+        global subid
+        subid = wx.GetNumberFromUser("Introduce the new subscription ID","New Sub ID","Change Subscription ID",subid,0,5000)
+        VehicleF.SetSubID(subid)
+        subrebuildthread = threading.Thread(target = self.RebuildSubs)
+        subrebuildthread.start()
 
     def OnCellClick(self,event):
         Col = event.GetCol()
@@ -719,7 +773,15 @@ class MainWindowClass(wx.Frame):
     def OnToggleAll(self,event):
         self.TogThread = threading.Thread(target = self.ToggleBrake, args = [1])
         self.TogThread.start()
-    
+    def RebuildSubs(self):
+        self.Rebuilding = 1
+        vc = len(self.FormationList)
+        for i in range(vc):
+            self.UpdateText("Rebuilding Subscriptions[" + str(i+1) + "/" + str(vc)+ "]")
+            self.FormationList[i].SetSubs()
+        self.Rebuilding = 0
+        self.UpdateText("Displaying Formation")
+        
     def OnSelection(self,event):
         #print("choice made")
         global PU
@@ -1035,6 +1097,7 @@ class MainWindowClass(wx.Frame):
                     else:
                         self.LocoSign = "-"
                     for i in range(self.fl-1,-1,-1):
+                            self.UpdateText("Rebuilding Formation[" + str(self.fl-i) +"/" + str(self.fl) + "]")
                             self.SkipCurrent = 0
                             vname = request.get(tswapi + "/get/CurrentFormation/" + str(i) + ".ObjectName", headers = header).json()
                             vname = vname['Values']['ObjectName']

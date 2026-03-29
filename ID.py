@@ -11,4 +11,5 @@ RefreshButtonID = 12
 WheelButtonID = 13
 ExpertControlsID = 14
 SubsItemID = 15
+ControlDisplayID = 16
 ToggleColumnID = 100
