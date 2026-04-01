@@ -12,4 +12,6 @@ WheelButtonID = 13
 ExpertControlsID = 14
 SubsItemID = 15
 ControlDisplayID = 16
+GenHelpID = 17
+ButtonHelpID = 18
 ToggleColumnID = 100

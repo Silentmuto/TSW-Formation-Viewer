@@ -18,7 +18,8 @@ import wx.grid
 import VehicleF
 from VehicleF import Vehicle
 from VehicleF import GetVehicleName
-#750 = Simulation/BrakePipe Simulation/BC_1
+
+
 PU = 0
 tswapi = "http://127.0.0.1:31270"   
 subid = 42
@@ -432,6 +433,8 @@ class MainWindowClass(wx.Frame):
         self.OptionsMenu.Append(ID.SubsItemID,"Subscription ID")
         self.OptionsMenu.Append(ID.ControlDisplayID,"Display settings")
         self.HelpMenu = wx.Menu("Help")
+        self.HelpMenu.Append(ID.GenHelpID ,"About")
+        self.HelpMenu.Append(ID.ButtonHelpID, "Buttons")
         self.MainBar.Append(self.OptionsMenu,"Options")
         self.MainBar.Append(self.HelpMenu,"Help")
 
@@ -465,31 +468,6 @@ class MainWindowClass(wx.Frame):
         self.FormationDisplay.SetDefaultCellBackgroundColour(self.BackgroundColourC)
         self.FormationDisplay.SetDefaultCellTextColour(self.TextColourC)
         self.FormationDisplay.SetGridLineColour(self.GridLineColourC)
-        hwnd = self.GetHandle()
-        try:
-                ctypes.windll.dwmapi.DwmSetWindowAttribute(
-                    hwnd, 20, ctypes.byref(ctypes.c_int(1)), 4
-                )
-        except Exception:
-                pass
-        try:
-                ctypes.windll.uxtheme.SetWindowTheme(hwnd, "DarkMode_Explorer", None)
-        except Exception:
-                pass
-                
-        for child in self.GetChildren():
-            hwnd = child.GetHandle()
-            try:
-                    ctypes.windll.dwmapi.DwmSetWindowAttribute(
-                        hwnd, 20, ctypes.byref(ctypes.c_int(1)), 4
-                    )
-            except Exception:
-                    pass
-                    
-            try:
-                    ctypes.windll.uxtheme.SetWindowTheme(hwnd, "DarkMode_Explorer", None)
-            except Exception:
-                    pass
         LogFile.write("Opening Update Thread \n")
         LogFile.flush() 
         self.statustext.SetLabel("Displaying Formation")
@@ -537,6 +515,49 @@ class MainWindowClass(wx.Frame):
                 if str(a) == "True":
                     self.FormationDisplay.HideCol(i)
         self.UpdateThread.start()
+        self.SetButtonState()
+    def SetButtonState(self):
+        try:
+            file = open("Program.json","r")
+            PArgs = json.load(file)
+            file.close()
+            if "ControlState" in PArgs:
+                JString = PArgs['ControlState']
+                JString = JString.replace("[","")
+                JString = JString.replace("]","")
+                JString = JString.replace(" ","")
+                print(JString)
+                aux = JString.split(",")
+                if aux[0] == "1":
+                    self.PressureUnitChoice.Show()
+                else:
+                    self.PressureUnitChoice.Hide()
+                if aux[1] == "1":
+                    self.Toggle5Button.Show()
+                else:
+                    self.Toggle5Button.Hide()
+                if aux[2] == "1":
+                    self.ToggleAllButton.Show()
+                else:
+                    self.ToggleAllButton.Hide()
+                if aux[3] == "1":
+                    self.ToggleColumnButton.Show()
+                else:
+                    self.ToggleColumnButton.Hide()
+                if aux[4] == "1":
+                    self.RefreshButton.Show()
+                else:
+                    self.RefreshButton.Hide()
+                if aux[5] == "1":
+                    self.WheelButton.Show()
+                else:
+                    self.WheelButton.Hide()
+                if aux[6] == "1":
+                    self.ThemeChoice.Show()
+                else:
+                    self.ThemeChoice.Hide()
+        except FileNotFoundError as e:
+            pass
     def OnExpertToggle(self,event):
         if self.OptionsMenu.IsChecked(ID.ExpertControlsID):
             self.FormationDisplay.HideCol(10)
@@ -560,6 +581,35 @@ class MainWindowClass(wx.Frame):
             self.Refresh()
     def OnClose(self,event):
             print("")
+            CStateList = []
+            if self.PressureUnitChoice.IsShown():
+                CStateList.append(1)
+            else:
+                CStateList.append(0)
+            if self.Toggle5Button.IsShown():
+                CStateList.append(1)
+            else:
+                CStateList.append(0)
+            if self.ToggleAllButton.IsShown():
+                CStateList.append(1)
+            else:
+                CStateList.append(0)
+            if self.ToggleColumnButton.IsShown():
+                CStateList.append(1)
+            else:
+                CStateList.append(0)
+            if self.RefreshButton.IsShown():
+                CStateList.append(1)
+            else:
+                CStateList.append(0)
+            if self.WheelButton.IsShown():
+                CStateList.append(1)
+            else:
+                CStateList.append(0)
+            if self.ThemeChoice.IsShown():
+                CStateList.append(1)
+            else:
+                CStateList.append(0)
             b = str(self.GetBackgroundColour())
             b = b.replace("(","")
             b = b.replace(")","")
@@ -576,9 +626,11 @@ class MainWindowClass(wx.Frame):
             file.write("\n")
             file.write('"' + "TextColour" + '"' + ':' +'"' + t +'"' + "," ) 
             file.write("\n")
-            file.write('"' + "GridLineColour" + '"' + ':' +'"' + g +'"') 
+            file.write('"' + "GridLineColour" + '"' + ':' +'"' + g +'"' + ",") 
             file.write("\n")
+            file.write('"' + "ControlState" + '"' + ':' +'"' + str(CStateList) + '"')
             file.write("}")
+
             file.close()
             wx.Exit()
     def OnColumnToggle(self,event):
@@ -626,11 +678,11 @@ class MainWindowClass(wx.Frame):
                     self.WheelButton.Show()
                 if Choices[i] == 6:
                     self.ThemeChoice.Show()
+        
         self.MainSizer.Layout()
         self.ButtonSizer.Layout()
         self.SecondRowSizer.Layout()
         self.WindowSizer.Layout()
-
     def OnThemeChange(self,event):
         if event.GetSelection() == 0:
             self.BackgroundColourC = [51,51,51]
@@ -677,11 +729,14 @@ class MainWindowClass(wx.Frame):
             request.patch(tswapi + "/set/CurrentFormation/" + str(i) + "/HitWheel_4R.InputValue?Value=0",headers= header)
     def OnSubChange(self,event):
         global subid
+        oldsubid = subid
         subid = wx.GetNumberFromUser("Introduce the new subscription ID","New Sub ID","Change Subscription ID",subid,0,5000)
         VehicleF.SetSubID(subid)
+        
         subrebuildthread = threading.Thread(target = self.RebuildSubs)
         subrebuildthread.start()
-
+        if self.VehCount > 0:
+            requests.delete(tswapi + "/subscription/?Subscription=" + str(oldsubid), headers = header).json()
     def OnCellClick(self,event):
         Col = event.GetCol()
         Row = event.GetRow()
@@ -746,7 +801,6 @@ class MainWindowClass(wx.Frame):
                 if Col == 14:
                     self.hbthread = threading.Thread(target = self.FormationList[Row].ChangeHandbrake,args = [Value])
                     self.hbthread.start()
-
     def OnEraseBackground(self, event):
         pass 
     def OnTopToggleF(self,event):
@@ -774,13 +828,14 @@ class MainWindowClass(wx.Frame):
         self.TogThread = threading.Thread(target = self.ToggleBrake, args = [1])
         self.TogThread.start()
     def RebuildSubs(self):
-        self.Rebuilding = 1
-        vc = len(self.FormationList)
-        for i in range(vc):
-            self.UpdateText("Rebuilding Subscriptions[" + str(i+1) + "/" + str(vc)+ "]")
-            self.FormationList[i].SetSubs()
-        self.Rebuilding = 0
-        self.UpdateText("Displaying Formation")
+        if self.VehCount > 0:
+            self.Rebuilding = 1
+            vc = len(self.FormationList)
+            for i in range(vc):
+                self.UpdateText("Rebuilding Subscriptions[" + str(i+1) + "/" + str(vc)+ "]")
+                self.FormationList[i].SetSubs()
+            self.Rebuilding = 0
+            self.UpdateText("Displaying Formation")
         
     def OnSelection(self,event):
         #print("choice made")
@@ -1249,9 +1304,7 @@ class MainWindowClass(wx.Frame):
                     self.ClearList()
             time.sleep(0.3)
 
-    
-
 
 app = wx.App(False,"ProgramOutput.log",)
-MainWindow = MainWindowClass(None, "Formation Viewer 1.3.1")
+MainWindow = MainWindowClass(None, "Formation Viewer 2.0 BETA")
 app.MainLoop()

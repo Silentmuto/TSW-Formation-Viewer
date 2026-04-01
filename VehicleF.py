@@ -113,15 +113,8 @@ class Vehicle:
             #print(self.index)
             self.TotalWeight = RVData.VehicleData[Vname]['Weight']
         else:
-            FoundData = self.FindData(index)
-            self.BTT = FoundData[0]
-            self.BPT = FoundData[1]
-            self.BCT = FoundData[2]
+            self.FindData()
             self.index = index
-            #print(f"BCT FOund is {self.BCT}")
-            self.isWagon = FoundData[3]
-            self.TotalWeight = FoundData[4]
-            self.DType = FoundData[5]
         LogFile.write(f"Finished Constructor for Name = {self.Name}, index = {self.index} \n")
 
             
